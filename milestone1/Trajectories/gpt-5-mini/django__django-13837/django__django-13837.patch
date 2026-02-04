@@ -1,0 +1,22 @@
+diff --git a/django/db/models/base.py b/django/db/models/base.py
+index 4038859cfa..afca06302b 100644
+--- a/django/db/models/base.py
++++ b/django/db/models/base.py
+@@ -1302,6 +1302,17 @@ class Model(metaclass=ModelBase):
+             not settings.is_overridden('DEFAULT_AUTO_FIELD') and
+             not cls._meta.app_config._is_default_auto_field_overridden
+         ):
++            # Don't warn for models which inherit the primary key from a
++            # parent model (multi-table inheritance). In that case the
++            # primary key is auto-created as the parent link and should not
++            # trigger the DEFAULT_AUTO_FIELD warning.
++            try:
++                parents = cls._meta.parents
++            except Exception:
++                parents = {}
++            if any(parent_field is cls._meta.pk for parent_field in parents.values() if parent_field):
++                return []
++
+             return [
+                 checks.Warning(
+                     f"Auto-created primary key used when not defining a "

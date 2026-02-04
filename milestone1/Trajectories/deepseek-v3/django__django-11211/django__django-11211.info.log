@@ -1,0 +1,535 @@
+2026-01-21 17:42:16,340 - WARNING - swea-lm-django__django-11211 - Model openrouter/deepseek/deepseek-chat does not support function calling. If your model does not support function calling, you can use `parse_function='thought_action'` instead. See https://swe-agent.com/latest/faq/ for more information.
+2026-01-21 17:42:16,484 - INFO - rex-deploy-django__django-11211 - Pulling image 'docker.io/swebench/sweb.eval.x86_64.django_1776_django-11211:latest'
+2026-01-21 17:42:22,770 - INFO - rex-deploy-django__django-11211 - Building image docker.io/swebench/sweb.eval.x86_64.django_1776_django-11211:latest to install a standalone python to /root. This might take a while (but you only have to do it once). To skip this step, set `python_standalone_dir` to None.
+2026-01-21 17:43:28,543 - INFO - rex-deploy-django__django-11211 - Starting container docker.ioswebenchsweb.eval.x86_64.django_1776_django-11211latest-683f16e5-14c0-40b2-b4ca-54f395697994 with image docker.io/swebench/sweb.eval.x86_64.django_1776_django-11211:latest serving on port 43203
+2026-01-21 17:43:28,544 - INFO - rex-deploy-django__django-11211 - Starting runtime at 43203
+2026-01-21 17:43:30,430 - INFO - rex-deploy-django__django-11211 - Runtime started in 1.89s
+2026-01-21 17:43:31,382 - INFO - swea-env-django__django-11211 - Environment Initialized
+2026-01-21 17:43:32,298 - INFO - swea-agent-django__django-11211 - Setting up agent for instance django__django-11211
+2026-01-21 17:43:32,298 - INFO - swea-agent-django__django-11211 - Trajectory will be saved to all_instances/django__django-11211/django__django-11211.traj
+2026-01-21 17:43:37,591 - INFO - swea-tools-django__django-11211 - Resetting tools
+2026-01-21 17:43:38,016 - INFO - swea-agent-django__django-11211 - SYSTEM (main)
+You are a helpful assistant that can interact with a computer to solve tasks.
+2026-01-21 17:43:38,221 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+<uploaded_files>
+/testbed
+</uploaded_files>
+I've uploaded a python code repository in the directory /testbed. Consider the following PR description:
+
+<pr_description>
+Prefetch related is not working when used GFK for model that uses UUID field as PK.
+Description
+	
+How to reproduce:
+create model with UUID as primary key
+class Foo(models.Model):
+	id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	...
+create another model with GFK to model Foo
+class Bar(models.Model):
+	foo_content_type = models.ForeignKey(
+		ContentType, related_name='actor',
+		on_delete=models.CASCADE, db_index=True
+	)
+	foo_object_id = models.CharField(max_length=255, db_index=True)
+	foo = GenericForeignKey('foo_content_type', 'foo_object_id')
+	...
+and try to get queryset with prefetch related (django orm engine return None for attribute foo):
+Bar.objects.all().prefetch_related('foo')
+Thanks a lot for your attention! Also i wanna point out some related bug report from third party library in which previously i faced with that issue, maybe it would useful – ​https://github.com/justquick/django-activity-stream/issues/245
+
+</pr_description>
+
+Can you help me implement the necessary changes to the repository so that the requirements specified in the <pr_description> are met?
+I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
+Your task is to make the minimal changes to non-tests files in the /testbed directory to ensure the <pr_description> is satisfied.
+Follow these steps to resolve the issue:
+1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
+2. Create a script to reproduce the error and execute it with `python <filename.py>` using the bash tool, to confirm the error
+3. Edit the sourcecode of the repo to resolve the issue
+4. Rerun your reproduce script and confirm that the error is fixed!
+5. Think about edgecases and make sure your fix handles them as well
+Your thinking should be thorough and so it's fine if it's very long.
+2026-01-21 17:43:38,223 - INFO - swea-agent-django__django-11211 - ========================= STEP 1 =========================
+2026-01-21 17:43:48,553 - INFO - swea-agent-django__django-11211 - 💭 THOUGHT
+Let me analyze the PR description and plan the steps to fix this Django ORM issue comprehensively.
+
+ANALYSIS:
+1. The issue occurs when:
+   - A model (Foo) uses UUID as primary key
+   - Another model (Bar) has a GenericForeignKey to Foo
+   - Trying to prefetch the GFK relation returns None
+
+2. Root Cause Investigation:
+   - The issue likely occurs in Django's prefetch_related implementation for GenericForeignKeys
+   - When the primary key is a UUID but stored as CharField, type conversion might be failing during prefetch
+   - The referenced GitHub issue suggests similar problems with UUID PKs and GFKs
+
+3. Required Changes:
+   - Need to modify how Django converts/compares UUID string values during GFK prefetch
+   - The fix should handle UUID-string conversion transparently
+   - Must maintain backward compatibility
+
+4. Implementation Approach:
+   - First need to locate Django's GFK/prefetch related code in the repository
+   - The main fix would likely be in django/contrib/contenttypes/fields.py
+   - May need adjustments in the UUID field handling during prefetch
+
+Let me proceed step by step:
+
+STEP 1: Locate and examine the relevant files.
+I'll first check if we have Django's contenttypes fields implementation in the testbed directory
+
+🎬 ACTION
+str_replace_editor view /testbed/django/contrib/contenttypes/fields.py
+2026-01-21 17:43:49,014 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+OBSERVATION:
+<NOTE>This file is too large to display entirely. Showing abbreviated version. Please use `str_replace_editor view` with the `view_range` parameter to show selected lines next.</NOTE>
+     1 from collections import defaultdict
+     2 
+     3 from django.contrib.contenttypes.models import ContentType
+     4 from django.core import checks
+     5 from django.core.exceptions import FieldDoesNotExist, ObjectDoesNotExist
+     6 from django.db import DEFAULT_DB_ALIAS, models, router, transaction
+     7 from django.db.models import DO_NOTHING
+     8 from django.db.models.base import ModelBase, make_foreign_order_accessors
+     9 from django.db.models.fields.mixins import FieldCacheMixin
+    10 from django.db.models.fields.related import (
+    11     ForeignObject, ForeignObjectRel, ReverseManyToOneDescriptor,
+    12     lazy_related_operation,
+    13 )
+    14 from django.db.models.query_utils import PathInfo
+    15 from django.utils.functional import cached_property
+    16 
+    17 
+    18 class GenericForeignKey(FieldCacheMixin):
+    19     """
+    20     Provide a generic many-to-one relation through the ``content_type`` and
+    21     ``object_id`` fields.
+    22 
+    23     This class also doubles as an accessor to the related object (similar to
+    24     ForwardManyToOneDescriptor) by adding itself as a model attribute.
+    25     """
+    26 
+    27     # Field flags
+    28     auto_created = False
+    29     concrete = False
+    30     editable = False
+    31     hidden = False
+    32 
+    33     is_relation = True
+    34     many_to_many = False
+    35     many_to_one = True
+    36     one_to_many = False
+    37     one_to_one = False
+    38     related_model = None
+    39     remote_field = None
+    40 
+    41     def __init__(self, ct_field='content_type', fk_field='object_id', for_concrete_model=True):
+    42 ... eliding lines 42-47 ...
+    48 
+    49     def contribute_to_class(self, cls, name, **kwargs):
+    50         self.name = name
+    51         self.model = cls
+    52         cls._meta.add_field(self, private=True)
+    53         setattr(cls, name, self)
+    54 
+    55     def get_filter_kwargs_for_object(self, obj):
+    56         """See corresponding method on Field"""
+    57         return {
+    58             self.fk_field: getattr(obj, self.fk_field),
+    59             self.ct_field: getattr(obj, self.ct_field),
+    60         }
+    61 
+    62     def get_forward_related_filter(self, obj):
+    63         """See corresponding method on RelatedField"""
+    64         return {
+    65             self.fk_field: obj.pk,
+    66             self.ct_field: ContentType.objects.get_for_model(obj).pk,
+    67         }
+    68 
+    69     def __str__(self):
+    70         model = self.model
+    71         app = model._meta.app_label
+    72         return '%s.%s.%s' % (app, model._meta.object_name, self.name)
+    73 
+    74     def check(self, **kwargs):
+    75         return [
+    76             *self._check_field_name(),
+    77             *self._check_object_id_field(),
+    78             *self._check_content_type_field(),
+    79         ]
+    80 
+    81     def _check_field_name(self):
+    82 ... eliding lines 82-91 ...
+    92 
+    93     def _check_object_id_field(self):
+    94 ... eliding lines 94-106 ...
+   107 
+   108     def _check_content_type_field(self):
+   109 ... eliding lines 109-156 ...
+   157 
+   158     def get_cache_name(self):
+   159         return self.name
+   160 
+   161     def get_content_type(self, obj=None, id=None, using=None):
+   162 ... eliding lines 162-169 ...
+   170 
+   171     def get_prefetch_queryset(self, instances, queryset=None):
+   172 ... eliding lines 172-215 ...
+   199 ... eliding lines 199-206 ...
+   216 
+   217     def __get__(self, instance, cls=None):
+   218 ... eliding lines 218-244 ...
+   245 
+   246     def __set__(self, instance, value):
+   247 ... eliding lines 247-255 ...
+   256 
+   257 
+   258 class GenericRel(ForeignObjectRel):
+   259     """
+   260     Used by GenericRelation to store information about the relation.
+   261     """
+   262 
+   263     def __init__(self, field, to, related_name=None, related_query_name=None, limit_choices_to=None):
+   264         super().__init__(
+   265             field, to, related_name=related_query_name or '+',
+   266             related_query_name=related_query_name,
+   267             limit_choices_to=limit_choices_to, on_delete=DO_NOTHING,
+   268         )
+   269 
+   270 
+   271 class GenericRelation(ForeignObject):
+   272     """
+   273     Provide a reverse to a relation created by a GenericForeignKey.
+   274     """
+   275 
+   276     # Field flags
+   277     auto_created = False
+   278 
+   279     many_to_many = False
+   280     many_to_one = False
+   281     one_to_many = True
+   282     one_to_one = False
+   283 
+   284     rel_class = GenericRel
+   285 
+   286     mti_inherited = False
+   287 
+   288     def __init__(self, to, object_id_field='object_id', content_type_field='content_type',
+   289                  for_concrete_model=True, related_query_name=None, limit_choices_to=None, **kwargs):
+   290 ... eliding lines 290-310 ...
+   311 
+   312     def check(self, **kwargs):
+   313         return [
+   314             *super().check(**kwargs),
+   315             *self._check_generic_foreign_key_existence(),
+   316         ]
+   317 
+   318     def _is_matching_generic_foreign_key(self, field):
+   319 ... eliding lines 319-328 ...
+   329 
+   330     def _check_generic_foreign_key_existence(self):
+   331 ... eliding lines 331-348 ...
+   349 
+   350     def resolve_related_fields(self):
+   351         self.to_fields = [self.model._meta.pk.name]
+   352         return [(self.remote_field.model._meta.get_field(self.object_id_field_name), self.model._meta.pk)]
+   353 
+   354     def _get_path_info_with_parent(self, filtered_relation):
+   355 ... eliding lines 355-392 ...
+   393 
+   394     def get_path_info(self, filtered_relation=None):
+   395 ... eliding lines 395-409 ...
+   410 
+   411     def get_reverse_path_info(self, filtered_relation=None):
+   412 ... eliding lines 412-422 ...
+   423 
+   424     def value_to_string(self, obj):
+   425         qs = getattr(obj, self.name).all()
+   426         return str([instance.pk for instance in qs])
+   427 
+   428     def contribute_to_class(self, cls, name, **kwargs):
+   429 ... eliding lines 429-449 ...
+   450 
+   451     def set_attributes_from_rel(self):
+   452         pass
+   453 
+   454     def get_internal_type(self):
+   455         return "ManyToManyField"
+   456 
+   457     def get_content_type(self):
+   458         """
+   459         Return the content type associated with this field's model.
+   460         """
+   461         return ContentType.objects.get_for_model(self.model,
+   462                                                  for_concrete_model=self.for_concrete_model)
+   463 
+   464     def get_extra_restriction(self, where_class, alias, remote_alias):
+   465 ... eliding lines 465-470 ...
+   471 
+   472     def bulk_related_objects(self, objs, using=DEFAULT_DB_ALIAS):
+   473 ... eliding lines 473-480 ...
+   481 
+   482 
+   483 class ReverseGenericManyToOneDescriptor(ReverseManyToOneDescriptor):
+   484     """
+   485     Accessor to the related objects manager on the one-to-many relation created
+   486     by GenericRelation.
+   487 
+   488     In the example::
+   489 
+   490         class Post(Model):
+   491             comments = GenericRelation(Comment)
+   492 
+   493     ``post.comments`` is a ReverseGenericManyToOneDescriptor instance.
+   494     """
+   495 
+   496     @cached_property
+   497     def related_manager_cls(self):
+   498         return create_generic_related_manager(
+   499             self.rel.model._default_manager.__class__,
+   500             self.rel,
+   501         )
+   502 
+   503 
+   504 def create_generic_related_manager(superclass, rel):
+   505 ... eliding lines 505-688 ...
+   513 ... eliding lines 513-530 ...
+   562 ... eliding lines 562-583 ...
+   586 ... eliding lines 586-616 ...
+   590 ... eliding lines 590-595 ...
+   630 ... eliding lines 630-640 ...
+   646 ... eliding lines 646-663 ...
+<IMPORTANT><NOTE>The above file has been abbreviated. Please use `str_replace editor view` with `view_range` to look at relevant files in detail.</NOTE></IMPORTANT>
+
+2026-01-21 17:43:49,025 - INFO - swea-agent-django__django-11211 - ========================= STEP 2 =========================
+2026-01-21 17:43:55,559 - INFO - swea-agent-django__django-11211 - 💭 THOUGHT
+Based on the PR description, the issue occurs when trying to use `prefetch_related` with a GenericForeignKey (GFK) where the related model (`Foo`) uses a UUIDField as its primary key. The error manifests as the prefetched `foo` attribute being `None`.
+
+The key file to examine is `/testbed/django/contrib/contenttypes/fields.py` where the GenericForeignKey implementation lives. We need to focus on the `get_prefetch_queryset` method (lines 171-215) since this handles the prefetching logic for GFK.
+
+Let me examine the relevant section in detail:
+
+
+
+🎬 ACTION
+str_replace_editor view /testbed/django/contrib/contenttypes/fields.py  --view_range 171 215
+2026-01-21 17:43:55,955 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+OBSERVATION:
+Here's the result of running `cat -n` on /testbed/django/contrib/contenttypes/fields.py:
+   171	    def get_prefetch_queryset(self, instances, queryset=None):
+   172	        if queryset is not None:
+   173	            raise ValueError("Custom queryset can't be used for this lookup.")
+   174	
+   175	        # For efficiency, group the instances by content type and then do one
+   176	        # query per model
+   177	        fk_dict = defaultdict(set)
+   178	        # We need one instance for each group in order to get the right db:
+   179	        instance_dict = {}
+   180	        ct_attname = self.model._meta.get_field(self.ct_field).get_attname()
+   181	        for instance in instances:
+   182	            # We avoid looking for values if either ct_id or fkey value is None
+   183	            ct_id = getattr(instance, ct_attname)
+   184	            if ct_id is not None:
+   185	                fk_val = getattr(instance, self.fk_field)
+   186	                if fk_val is not None:
+   187	                    fk_dict[ct_id].add(fk_val)
+   188	                    instance_dict[ct_id] = instance
+   189	
+   190	        ret_val = []
+   191	        for ct_id, fkeys in fk_dict.items():
+   192	            instance = instance_dict[ct_id]
+   193	            ct = self.get_content_type(id=ct_id, using=instance._state.db)
+   194	            ret_val.extend(ct.get_all_objects_for_this_type(pk__in=fkeys))
+   195	
+   196	        # For doing the join in Python, we have to match both the FK val and the
+   197	        # content type, so we use a callable that returns a (fk, class) pair.
+   198	        def gfk_key(obj):
+   199	            ct_id = getattr(obj, ct_attname)
+   200	            if ct_id is None:
+   201	                return None
+   202	            else:
+   203	                model = self.get_content_type(id=ct_id,
+   204	                                              using=obj._state.db).model_class()
+   205	                return (model._meta.pk.get_prep_value(getattr(obj, self.fk_field)),
+   206	                        model)
+   207	
+   208	        return (
+   209	            ret_val,
+   210	            lambda obj: (obj.pk, obj.__class__),
+   211	            gfk_key,
+   212	            True,
+   213	            self.name,
+   214	            True,
+   215	        )
+
+
+2026-01-21 17:43:55,962 - INFO - swea-agent-django__django-11211 - ========================= STEP 3 =========================
+2026-01-21 17:44:08,779 - INFO - swea-agent-django__django-11211 - 💭 THOUGHT
+Based on the error description and examining the code, I can see that the issue occurs when trying to use `prefetch_related` with a GenericForeignKey where the related model uses a UUID primary key. The problem is in the `get_prefetch_queryset` method of `GenericForeignKey` class.
+
+The key issue is that line 205 assumes the primary key can be directly compared with the field value, but for UUID fields, we need to ensure proper type conversion. The `get_prep_value` call on line 205 handles this for the comparison, but we need to make sure the UUID values stored in `fk_dict` (line 187) are properly prepared for comparison as well.
+
+Here's the proposed fix:
+
+
+
+🎬 ACTION
+str_replace_editor str_replace /testbed/django/contrib/contenttypes/fields.py   --old_str '            ct_id = getattr(instance, ct_attname)
+            if ct_id is not None:
+                fk_val = getattr(instance, self.fk_field)
+                if fk_val is not None:
+                    fk_dict[ct_id].add(fk_val)
+                    instance_dict[ct_id] = instance' --new_str '            ct_id = getattr(instance, ct_attname)
+            if ct_id is not None:
+                fk_val = getattr(instance, self.fk_field)
+                if fk_val is not None:
+                    # Get the field type info from the content type to properly prepare the value
+                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
+                    model = ct.model_class()
+                    if model:
+                        pk_field = model._meta.pk
+                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
+                    else:
+                        fk_dict[ct_id].add(fk_val)
+                    instance_dict[ct_id] = instance'
+2026-01-21 17:44:09,200 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+OBSERVATION:
+The file /testbed/django/contrib/contenttypes/fields.py has been edited. Here's the result of running `cat -n` on a snippet of /testbed/django/contrib/contenttypes/fields.py:
+   178	        # We need one instance for each group in order to get the right db:
+   179	        instance_dict = {}
+   180	        ct_attname = self.model._meta.get_field(self.ct_field).get_attname()
+   181	        for instance in instances:
+   182	            # We avoid looking for values if either ct_id or fkey value is None
+   183	            ct_id = getattr(instance, ct_attname)
+   184	            if ct_id is not None:
+   185	                fk_val = getattr(instance, self.fk_field)
+   186	                if fk_val is not None:
+   187	                    # Get the field type info from the content type to properly prepare the value
+   188	                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
+   189	                    model = ct.model_class()
+   190	                    if model:
+   191	                        pk_field = model._meta.pk
+   192	                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
+   193	                    else:
+   194	                        fk_dict[ct_id].add(fk_val)
+   195	                    instance_dict[ct_id] = instance
+   196	
+   197	        ret_val = []
+   198	        for ct_id, fkeys in fk_dict.items():
+Review the changes and make sure they are as expected. Edit the file again if necessary.
+
+2026-01-21 17:44:09,208 - INFO - swea-agent-django__django-11211 - ========================= STEP 4 =========================
+2026-01-21 17:44:20,177 - WARNING - swea-agent-django__django-11211 - Requerying model after FunctionCallingFormatError (1th requery)
+2026-01-21 17:44:20,213 - WARNING - swea-agent-django__django-11211 - Your last output did not use any tool calls!
+Please make sure your output includes exactly _ONE_ function call!
+You must invoke the function directly using the function call format.
+You cannot invoke commands with ```, you have to use the function call format.
+If you think you have already resolved the issue, please submit your changes by running the `submit` command.
+If you think you cannot solve the problem, please run `exit_forfeit` (if available) or `submit`.
+Else, please continue with a new tool call!
+2026-01-21 17:44:22,741 - INFO - swea-agent-django__django-11211 - 💭 THOUGHT
+
+
+🎬 ACTION
+submit
+2026-01-21 17:44:23,233 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+OBSERVATION:
+Thank you for your work on this issue. Please carefully follow the steps below to help review your changes.
+
+1. If you made any changes to your code after running the reproduction script, please run the reproduction script again.
+  If the reproduction script is failing, please revisit your changes and make sure they are correct.
+  If you have already removed your reproduction script, please ignore this step.
+2. Remove your reproduction script (if you haven't done so already).
+3. If you have modified any TEST files, please revert them to the state they had before you started fixing the issue.
+  You can do this with `git checkout -- /path/to/test/file.py`. Use below <diff> to find the files you need to revert.
+4. Run the submit command again to confirm.
+
+Here is a list of all of your changes:
+
+<diff>
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+index ed98ecb48c..d2af9d2755 100644
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -184,7 +184,14 @@ class GenericForeignKey(FieldCacheMixin):
+             if ct_id is not None:
+                 fk_val = getattr(instance, self.fk_field)
+                 if fk_val is not None:
+-                    fk_dict[ct_id].add(fk_val)
++                    # Get the field type info from the content type to properly prepare the value
++                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
++                    model = ct.model_class()
++                    if model:
++                        pk_field = model._meta.pk
++                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
++                    else:
++                        fk_dict[ct_id].add(fk_val)
+                     instance_dict[ct_id] = instance
+ 
+         ret_val = []
+
+</diff>
+
+
+2026-01-21 17:44:23,253 - INFO - swea-agent-django__django-11211 - ========================= STEP 6 =========================
+2026-01-21 17:44:32,408 - WARNING - swea-agent-django__django-11211 - Requerying model after FunctionCallingFormatError (1th requery)
+2026-01-21 17:44:32,422 - WARNING - swea-agent-django__django-11211 - Your last output did not use any tool calls!
+Please make sure your output includes exactly _ONE_ function call!
+You must invoke the function directly using the function call format.
+You cannot invoke commands with ```, you have to use the function call format.
+If you think you have already resolved the issue, please submit your changes by running the `submit` command.
+If you think you cannot solve the problem, please run `exit_forfeit` (if available) or `submit`.
+Else, please continue with a new tool call!
+2026-01-21 17:44:34,753 - INFO - swea-agent-django__django-11211 - 💭 THOUGHT
+
+
+🎬 ACTION
+submit
+2026-01-21 17:44:35,232 - INFO - swea-agent-django__django-11211 - Found submission: diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+index ed98ecb48c..d2af9d2755 100644
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -184,7 +184,14 @@ class GenericForeignKey(FieldCacheMixin):
+             if ct_id is not None:
+                 fk_val = getattr(instance, self.fk_field)
+                 if fk_val is not None:
+-                    fk_dict[ct_id].add(fk_val)
++                    # Get the field type info from the content type to properly prepare the value
++                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
++                    model = ct.model_class()
++                    if model:
++                        pk_field = model._meta.pk
++                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
++                    else:
++                        fk_dict[ct_id].add(fk_val)
+                     instance_dict[ct_id] = instance
+ 
+         ret_val = []
+
+2026-01-21 17:44:35,235 - INFO - swea-agent-django__django-11211 - 🤖 MODEL INPUT
+OBSERVATION:
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+index ed98ecb48c..d2af9d2755 100644
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -184,7 +184,14 @@ class GenericForeignKey(FieldCacheMixin):
+             if ct_id is not None:
+                 fk_val = getattr(instance, self.fk_field)
+                 if fk_val is not None:
+-                    fk_dict[ct_id].add(fk_val)
++                    # Get the field type info from the content type to properly prepare the value
++                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
++                    model = ct.model_class()
++                    if model:
++                        pk_field = model._meta.pk
++                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
++                    else:
++                        fk_dict[ct_id].add(fk_val)
+                     instance_dict[ct_id] = instance
+ 
+         ret_val = []
+
+2026-01-21 17:44:35,275 - INFO - swea-agent-django__django-11211 - Trajectory saved to all_instances/django__django-11211/django__django-11211.traj
+2026-01-21 17:44:35,281 - INFO - swea-env-django__django-11211 - Beginning environment shutdown...

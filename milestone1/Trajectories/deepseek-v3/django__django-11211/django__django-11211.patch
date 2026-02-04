@@ -1,0 +1,20 @@
+diff --git a/django/contrib/contenttypes/fields.py b/django/contrib/contenttypes/fields.py
+index ed98ecb48c..d2af9d2755 100644
+--- a/django/contrib/contenttypes/fields.py
++++ b/django/contrib/contenttypes/fields.py
+@@ -184,7 +184,14 @@ class GenericForeignKey(FieldCacheMixin):
+             if ct_id is not None:
+                 fk_val = getattr(instance, self.fk_field)
+                 if fk_val is not None:
+-                    fk_dict[ct_id].add(fk_val)
++                    # Get the field type info from the content type to properly prepare the value
++                    ct = self.get_content_type(id=ct_id, using=instance._state.db)
++                    model = ct.model_class()
++                    if model:
++                        pk_field = model._meta.pk
++                        fk_dict[ct_id].add(pk_field.get_prep_value(fk_val))
++                    else:
++                        fk_dict[ct_id].add(fk_val)
+                     instance_dict[ct_id] = instance
+ 
+         ret_val = []

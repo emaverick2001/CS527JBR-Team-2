@@ -1,0 +1,387 @@
+2026-01-22 02:17:49,638 - WARNING - swea-lm-sympy__sympy-24539 - Model openrouter/deepseek/deepseek-chat does not support function calling. If your model does not support function calling, you can use `parse_function='thought_action'` instead. See https://swe-agent.com/latest/faq/ for more information.
+2026-01-22 02:17:50,061 - INFO - rex-deploy-sympy__sympy-24539 - Pulling image 'docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest'
+2026-01-22 02:17:50,284 - ERROR - swea-agent-sympy__sympy-24539 - Traceback (most recent call last):
+  File "/users/Saman/lib/python3.12/site-packages/swerex/deployment/docker.py", line 143, in _pull_image
+    _pull_image(self._config.image, self._config.container_runtime)
+  File "/users/Saman/lib/python3.12/site-packages/swerex/deployment/docker.py", line 42, in _pull_image
+    raise subprocess.CalledProcessError(e.returncode, e.cmd, e.output, e.stderr) from None
+subprocess.CalledProcessError: Command '['docker', 'pull', 'docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest']' returned non-zero exit status 1.
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/users/Saman/SWE-agent/sweagent/run/run_batch.py", line 358, in _run_instance
+    env.start()
+  File "/users/Saman/SWE-agent/sweagent/environment/swe_env.py", line 111, in start
+    self._init_deployment()
+  File "/users/Saman/SWE-agent/sweagent/environment/swe_env.py", line 183, in _init_deployment
+    asyncio.run(self.deployment.start())
+  File "/usr/lib/python3.12/asyncio/runners.py", line 194, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/asyncio/base_events.py", line 687, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/users/Saman/lib/python3.12/site-packages/swerex/deployment/docker.py", line 232, in start
+    self._pull_image()
+  File "/users/Saman/lib/python3.12/site-packages/swerex/deployment/docker.py", line 148, in _pull_image
+    raise DockerPullError(msg) from e
+swerex.exceptions.DockerPullError: Failed to pull image docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest. Error: write /var/lib/containerd/io.containerd.content.v1.content/ingest/9e51eef3175db83ef94bac452409ebcad86e905614888f6480566a2f6773eacd/ref: no space left on device
+Output: latest: Pulling from swebench/sweb.eval.x86_64.sympy_1776_sympy-24539
+
+
+2026-01-22 02:17:50,404 - INFO - swea-env-sympy__sympy-24539 - Beginning environment shutdown...
+2026-01-22 03:07:31,173 - WARNING - swea-lm-sympy__sympy-24539 - Model openrouter/deepseek/deepseek-chat does not support function calling. If your model does not support function calling, you can use `parse_function='thought_action'` instead. See https://swe-agent.com/latest/faq/ for more information.
+2026-01-22 05:28:04,793 - WARNING - swea-lm-sympy__sympy-24539 - Model openrouter/deepseek/deepseek-chat does not support function calling. If your model does not support function calling, you can use `parse_function='thought_action'` instead. See https://swe-agent.com/latest/faq/ for more information.
+2026-01-22 05:28:04,935 - INFO - rex-deploy-sympy__sympy-24539 - Pulling image 'docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest'
+2026-01-22 05:28:08,972 - INFO - rex-deploy-sympy__sympy-24539 - Building image docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest to install a standalone python to /root. This might take a while (but you only have to do it once). To skip this step, set `python_standalone_dir` to None.
+2026-01-22 05:29:16,993 - DEBUG - free_port-sympy__sympy-24539 - Found free port 32801
+2026-01-22 05:29:16,993 - INFO - rex-deploy-sympy__sympy-24539 - Starting container docker.ioswebenchsweb.eval.x86_64.sympy_1776_sympy-24539latest-9ad7f2bd-935f-49fe-980c-33dc17de1c33 with image docker.io/swebench/sweb.eval.x86_64.sympy_1776_sympy-24539:latest serving on port 32801
+2026-01-22 05:29:16,993 - DEBUG - rex-deploy-sympy__sympy-24539 - Command: "docker run --rm -p 32801:8000 --platform linux/amd64 --memory=10g --name docker.ioswebenchsweb.eval.x86_64.sympy_1776_sympy-24539latest-9ad7f2bd-935f-49fe-980c-33dc17de1c33 sha256:ed97f2d23847a2c7411338768728653d49cb89c47e8d2decd98d0f37b03cbab4 /bin/sh -c '/root/python3.11/bin/swerex-remote --auth-token 72b99c8e-d370-4399-9b13-b1a68bcc6b4c'"
+2026-01-22 05:29:16,994 - INFO - rex-deploy-sympy__sympy-24539 - Starting runtime at 32801
+2026-01-22 05:29:18,818 - INFO - rex-deploy-sympy__sympy-24539 - Runtime started in 1.82s
+2026-01-22 05:29:19,790 - INFO - swea-env-sympy__sympy-24539 - Environment Initialized
+2026-01-22 05:29:20,082 - DEBUG - swea-env-sympy__sympy-24539 - Resetting repository testbed to commit 193e3825645d93c73e31cdceb6d742cc6919624d
+2026-01-22 05:29:20,448 - INFO - swea-agent-sympy__sympy-24539 - Setting up agent for instance sympy__sympy-24539
+2026-01-22 05:29:20,448 - INFO - swea-agent-sympy__sympy-24539 - Trajectory will be saved to all_instances/sympy__sympy-24539/sympy__sympy-24539.traj
+2026-01-22 05:29:20,695 - DEBUG - rex-runtime-sympy__sympy-24539 - Uploading file from /users/Saman/SWE-agent/tools/registry to /root/tools/registry
+2026-01-22 05:29:20,700 - DEBUG - rex-runtime-sympy__sympy-24539 - Created zip file at /tmp/tmp46vijjgv/zipped_transfer.zip
+2026-01-22 05:29:20,702 - DEBUG - rex-runtime-sympy__sympy-24539 - Uploading file from /users/Saman/SWE-agent/tools/edit_anthropic to /root/tools/edit_anthropic
+2026-01-22 05:29:20,708 - DEBUG - rex-runtime-sympy__sympy-24539 - Created zip file at /tmp/tmpvc22ghdn/zipped_transfer.zip
+2026-01-22 05:29:20,710 - DEBUG - rex-runtime-sympy__sympy-24539 - Uploading file from /users/Saman/SWE-agent/tools/review_on_submit_m to /root/tools/review_on_submit_m
+2026-01-22 05:29:20,713 - DEBUG - rex-runtime-sympy__sympy-24539 - Created zip file at /tmp/tmpfawmpyql/zipped_transfer.zip
+2026-01-22 05:29:23,988 - INFO - swea-tools-sympy__sympy-24539 - Resetting tools
+2026-01-22 05:29:24,576 - INFO - swea-agent-sympy__sympy-24539 - SYSTEM (main)
+You are a helpful assistant that can interact with a computer to solve tasks.
+2026-01-22 05:29:24,741 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:29:24,746 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+<uploaded_files>
+/testbed
+</uploaded_files>
+I've uploaded a python code repository in the directory /testbed. Consider the following PR description:
+
+<pr_description>
+`PolyElement.as_expr()` not accepting symbols
+The method `PolyElement.as_expr()`
+
+https://github.com/sympy/sympy/blob/193e3825645d93c73e31cdceb6d742cc6919624d/sympy/polys/rings.py#L618-L624
+
+is supposed to let you set the symbols you want to use, but, as it stands, either you pass the wrong number of symbols, and get an error message, or you pass the right number of symbols, and it ignores them, using `self.ring.symbols` instead:
+
+```python
+>>> from sympy import ring, ZZ, symbols
+>>> R, x, y, z = ring("x,y,z", ZZ)
+>>> f = 3*x**2*y - x*y*z + 7*z**3 + 1
+>>> U, V, W = symbols("u,v,w")
+>>> f.as_expr(U, V, W)
+3*x**2*y - x*y*z + 7*z**3 + 1
+```
+
+</pr_description>
+
+Can you help me implement the necessary changes to the repository so that the requirements specified in the <pr_description> are met?
+I've already taken care of all changes to any of the test files described in the <pr_description>. This means you DON'T have to modify the testing logic or any of the tests in any way!
+Your task is to make the minimal changes to non-tests files in the /testbed directory to ensure the <pr_description> is satisfied.
+Follow these steps to resolve the issue:
+1. As a first step, it might be a good idea to find and read code relevant to the <pr_description>
+2. Create a script to reproduce the error and execute it with `python <filename.py>` using the bash tool, to confirm the error
+3. Edit the sourcecode of the repo to resolve the issue
+4. Rerun your reproduce script and confirm that the error is fixed!
+5. Think about edgecases and make sure your fix handles them as well
+Your thinking should be thorough and so it's fine if it's very long.
+2026-01-22 05:29:24,747 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 1 =========================
+2026-01-22 05:29:24,747 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 1
+2026-01-22 05:29:24,751 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:29:34,505 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059764-Wm7v8DpJsI8xTtrgPudK', created=1769059764, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='stop', index=0, message=Message(content="Let me analyze the issue and plan the fix systematically.\n\nAnalysis:\n1. The issue describes that `PolyElement.as_expr()` ignores the symbols passed to it, instead using `self.ring.symbols`\n2. Looking at the GitHub link, we can see the method currently just returns `build_expr(self, cls, self.ring.symbols)`\n3. The expected behavior should be to use the symbols passed as arguments, not the ring symbols\n\nReproduction Steps:\n1. First, let's verify the current behavior by creating a test script\n2. Then we'll modify the implementation in rings.py\n3. Finally, we'll verify the fix works\n\nLet's start by creating test script to confirm the current behavior:\n\n", role='assistant', tool_calls=None, function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'stop'})], usage=Usage(completion_tokens=308, prompt_tokens=1707, total_tokens=2015, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0010832, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0006828, 'upstream_inference_completions_cost': 0.0004004}), provider='Novita')
+2026-01-22 05:29:34,523 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=508, output_tokens=146, instance_cost=0.00, cost=0.00
+2026-01-22 05:29:34,523 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=508, total_tokens_received=146, total_cost=2.29, total_api_calls=1
+2026-01-22 05:29:34,524 - WARNING - swea-agent-sympy__sympy-24539 - Requerying model after FunctionCallingFormatError (1th requery)
+2026-01-22 05:29:34,625 - WARNING - swea-agent-sympy__sympy-24539 - Your last output did not use any tool calls!
+Please make sure your output includes exactly _ONE_ function call!
+You must invoke the function directly using the function call format.
+You cannot invoke commands with ```, you have to use the function call format.
+If you think you have already resolved the issue, please submit your changes by running the `submit` command.
+If you think you cannot solve the problem, please run `exit_forfeit` (if available) or `submit`.
+Else, please continue with a new tool call!
+2026-01-22 05:29:34,665 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 1
+2026-01-22 05:29:34,667 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:29:40,207 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059774-j49N6ikvp4vg8s3f4BxP', created=1769059774, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content='', role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"create","file_text":"from sympy import ring, ZZ, symbols\\n\\nR, x, y, z = ring(\\"x,y,z\\", ZZ)\\nf = 3*x**2*y - x*y*z + 7*z**3 + 1\\nU, V, W = symbols(\\"u,v,w\\")\\nprint(f.as_expr(U, V, W))","path":"/testbed/reproduce_as_expr.py"}', name='str_replace_editor'), id='call_tshah38m6z1hfkklkxqalff7', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=113, prompt_tokens=1669, total_tokens=1782, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0008145, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0006676, 'upstream_inference_completions_cost': 0.0001469}), provider='Novita')
+2026-01-22 05:29:40,220 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=769, output_tokens=0, instance_cost=0.00, cost=0.00
+2026-01-22 05:29:40,220 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=1,277, total_tokens_received=146, total_cost=2.29, total_api_calls=2
+2026-01-22 05:29:40,231 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+
+
+🎬 ACTION
+str_replace_editor create /testbed/reproduce_as_expr.py --file_text 'from sympy import ring, ZZ, symbols
+
+R, x, y, z = ring("x,y,z", ZZ)
+f = 3*x**2*y - x*y*z + 7*z**3 + 1
+U, V, W = symbols("u,v,w")
+print(f.as_expr(U, V, W))'
+2026-01-22 05:29:40,612 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:29:40,614 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+File created successfully at: /testbed/reproduce_as_expr.py
+
+2026-01-22 05:29:40,618 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 3 =========================
+2026-01-22 05:29:40,619 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:29:40,623 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:29:46,335 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059780-SL1EwrsRZaAl5BXdij4p', created=1769059780, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content="I've created a reproduction script at `/testbed/reproduce_as_expr.py` that demonstrates the issue described in the PR description. The script shows that `f.as_expr(U, V, W)` currently ignores the passed symbols and uses `self.ring.symbols` instead.\n\nLet's examine the relevant code in the repository. First, I'll check the current implementation of `as_expr()` in `/testbed/sympy/polys/rings.py`:\n\n", role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"view","path":"/testbed/sympy/polys/rings.py","view_range":[618,624]}', name='str_replace_editor'), id='67a7aef3588d4cf4bd2dd5131f3b89ea', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=164, prompt_tokens=1867, total_tokens=2031, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.00096, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0007468, 'upstream_inference_completions_cost': 0.0002132}), provider='Novita')
+2026-01-22 05:29:46,353 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=645, output_tokens=94, instance_cost=0.00, cost=0.00
+2026-01-22 05:29:46,358 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=1,922, total_tokens_received=240, total_cost=2.29, total_api_calls=3
+2026-01-22 05:29:46,376 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+I've created a reproduction script at `/testbed/reproduce_as_expr.py` that demonstrates the issue described in the PR description. The script shows that `f.as_expr(U, V, W)` currently ignores the passed symbols and uses `self.ring.symbols` instead.
+
+Let's examine the relevant code in the repository. First, I'll check the current implementation of `as_expr()` in `/testbed/sympy/polys/rings.py`:
+
+
+
+🎬 ACTION
+str_replace_editor view /testbed/sympy/polys/rings.py  --view_range 618 624
+2026-01-22 05:29:46,777 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:29:46,780 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+Here's the result of running `cat -n` on /testbed/sympy/polys/rings.py:
+   618	    def as_expr(self, *symbols):
+   619	        if symbols and len(symbols) != self.ring.ngens:
+   620	            raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+   621	        else:
+   622	            symbols = self.ring.symbols
+   623	
+   624	        return expr_from_dict(self.as_expr_dict(), *symbols)
+
+
+2026-01-22 05:29:46,785 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 4 =========================
+2026-01-22 05:29:46,787 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:29:46,791 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:29:58,805 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059786-ea5NGydKT2hWJKiMPMg2', created=1769059786, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content="Let me analyze the issue and propose a solution:\n\n1. Current Behavior Analysis:\n- The method `PolyElement.as_expr()` currently has two paths:\n  a) If symbols are provided but count doesn't match, raises ValueError\n  b) If no symbols OR if count matches, uses self.ring.symbols regardless\n\n2. Expected Behavior:\n- When correct number of symbols is provided, should use those instead of ring.symbols\n- The bug is in line 622 overriding symbols even when valid ones are provided\n\n3. Solution:\n- Need to modify the logic to keep provided symbols when count matches\n- Should only fall back to ring.symbols when no symbols are provided\n\n4. Edge Cases to Consider:\n- Maintains existing check for wrong number of symbols\n- Preserves behavior when no symbols are provided\n- Still properly handles the case where symbols match count\n\nHere's the proposed change:\n\n", role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"str_replace","old_str":"    def as_expr(self, *symbols):\\n        if symbols and len(symbols) != self.ring.ngens:\\n            raise ValueError(\\"not enough symbols, expected %s got %s\\" % (self.ring.ngens, len(symbols)))\\n        else:\\n            symbols = self.ring.symbols\\n\\n        return expr_from_dict(self.as_expr_dict(), *symbols)","new_str":"    def as_expr(self, *symbols):\\n        if symbols and len(symbols) != self.ring.ngens:\\n            raise ValueError(\\"not enough symbols, expected %s got %s\\" % (self.ring.ngens, len(symbols)))\\n        if not symbols:\\n            symbols = self.ring.symbols\\n\\n        return expr_from_dict(self.as_expr_dict(), *symbols)","path":"/testbed/sympy/polys/rings.py"}', name='str_replace_editor'), id='7783d706e1354b379c5241e5576cdcdb', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=442, prompt_tokens=2065, total_tokens=2507, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0014006, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.000826, 'upstream_inference_completions_cost': 0.0005746}), provider='Novita')
+2026-01-22 05:29:58,824 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=922, output_tokens=183, instance_cost=0.00, cost=0.00
+2026-01-22 05:29:58,829 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=2,844, total_tokens_received=423, total_cost=2.29, total_api_calls=4
+2026-01-22 05:29:58,842 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+Let me analyze the issue and propose a solution:
+
+1. Current Behavior Analysis:
+- The method `PolyElement.as_expr()` currently has two paths:
+  a) If symbols are provided but count doesn't match, raises ValueError
+  b) If no symbols OR if count matches, uses self.ring.symbols regardless
+
+2. Expected Behavior:
+- When correct number of symbols is provided, should use those instead of ring.symbols
+- The bug is in line 622 overriding symbols even when valid ones are provided
+
+3. Solution:
+- Need to modify the logic to keep provided symbols when count matches
+- Should only fall back to ring.symbols when no symbols are provided
+
+4. Edge Cases to Consider:
+- Maintains existing check for wrong number of symbols
+- Preserves behavior when no symbols are provided
+- Still properly handles the case where symbols match count
+
+Here's the proposed change:
+
+
+
+🎬 ACTION
+str_replace_editor str_replace /testbed/sympy/polys/rings.py   --old_str '    def as_expr(self, *symbols):
+        if symbols and len(symbols) != self.ring.ngens:
+            raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+        else:
+            symbols = self.ring.symbols
+
+        return expr_from_dict(self.as_expr_dict(), *symbols)' --new_str '    def as_expr(self, *symbols):
+        if symbols and len(symbols) != self.ring.ngens:
+            raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+        if not symbols:
+            symbols = self.ring.symbols
+
+        return expr_from_dict(self.as_expr_dict(), *symbols)'
+2026-01-22 05:29:59,268 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:29:59,271 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+The file /testbed/sympy/polys/rings.py has been edited. Here's the result of running `cat -n` on a snippet of /testbed/sympy/polys/rings.py:
+   613	            terms = list(zip(*_dict_reorder(self, self.ring.symbols, new_ring.symbols)))
+   614	            return new_ring.from_terms(terms, self.ring.domain)
+   615	        else:
+   616	            return new_ring.from_dict(self, self.ring.domain)
+   617	
+   618	    def as_expr(self, *symbols):
+   619	        if symbols and len(symbols) != self.ring.ngens:
+   620	            raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+   621	        if not symbols:
+   622	            symbols = self.ring.symbols
+   623	
+   624	        return expr_from_dict(self.as_expr_dict(), *symbols)
+   625	
+   626	    def as_expr_dict(self):
+   627	        to_sympy = self.ring.domain.to_sympy
+Review the changes and make sure they are as expected. Edit the file again if necessary.
+
+2026-01-22 05:29:59,279 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 5 =========================
+2026-01-22 05:29:59,280 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:29:59,288 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:05,340 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059799-A4btYS9hyZIHR2tjqTak', created=1769059799, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content="The changes look correct and address the issue described in the PR description. Here's what was changed:\n\n1. The original code would always fall back to `self.ring.symbols` if the number of symbols matched (via the `else` clause)\n2. The modified version now only uses `self.ring.symbols` if no symbols were provided at all (via the `if not symbols` check)\n3. When symbols are provided and the count matches, they will now be used as intended\n\nThis matches the behavior expected in the PR description where `f.as_expr(U, V, W)` should use the provided symbols U,V,W rather than falling back to x,y,z.\n\nLet's verify the fix by running the reproduction script:\n\n", role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"python /testbed/reproduce_as_expr.py"}', name='bash'), id='1997d90964d142049fea0a14023b61bf', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=203, prompt_tokens=2595, total_tokens=2798, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0013019, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.001038, 'upstream_inference_completions_cost': 0.0002639}), provider='Novita')
+2026-01-22 05:30:05,347 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=1,592, output_tokens=150, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:05,348 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=4,436, total_tokens_received=573, total_cost=2.29, total_api_calls=5
+2026-01-22 05:30:05,350 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+The changes look correct and address the issue described in the PR description. Here's what was changed:
+
+1. The original code would always fall back to `self.ring.symbols` if the number of symbols matched (via the `else` clause)
+2. The modified version now only uses `self.ring.symbols` if no symbols were provided at all (via the `if not symbols` check)
+3. When symbols are provided and the count matches, they will now be used as intended
+
+This matches the behavior expected in the PR description where `f.as_expr(U, V, W)` should use the provided symbols U,V,W rather than falling back to x,y,z.
+
+Let's verify the fix by running the reproduction script:
+
+
+
+🎬 ACTION
+python /testbed/reproduce_as_expr.py
+2026-01-22 05:30:07,653 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:30:07,656 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+3*u**2*v - u*v*w + 7*w**3 + 1
+
+2026-01-22 05:30:07,666 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 6 =========================
+2026-01-22 05:30:07,668 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:30:07,677 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:13,466 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059807-gYMQTC9EJgQ5q3AjcsUi', created=1769059807, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='stop', index=0, message=Message(content='The reproduction script now produces the correct output: `3*u**2*v - u*v*w + 7*w**3 + 1`. This confirms that:\n\n1. The fix is working as expected - the provided symbols (U, V, W) are now being used instead of the ring symbols (x, y, z)\n2. The polynomial expression is correctly converted using the new symbols\n3. The original functionality is preserved when no symbols are provided\n\nThe changes successfully resolve the issue while maintaining all existing functionality. No further modifications are needed. The fix is minimal and focused exactly on the described problem.', role='assistant', tool_calls=None, function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'stop'})], usage=Usage(completion_tokens=124, prompt_tokens=2314, total_tokens=2438, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0010868, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0009256, 'upstream_inference_completions_cost': 0.0001612}), provider='Novita')
+2026-01-22 05:30:13,483 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=1,803, output_tokens=124, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:13,484 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=6,239, total_tokens_received=697, total_cost=2.29, total_api_calls=6
+2026-01-22 05:30:13,484 - WARNING - swea-agent-sympy__sympy-24539 - Requerying model after FunctionCallingFormatError (1th requery)
+2026-01-22 05:30:13,539 - WARNING - swea-agent-sympy__sympy-24539 - Your last output did not use any tool calls!
+Please make sure your output includes exactly _ONE_ function call!
+You must invoke the function directly using the function call format.
+You cannot invoke commands with ```, you have to use the function call format.
+If you think you have already resolved the issue, please submit your changes by running the `submit` command.
+If you think you cannot solve the problem, please run `exit_forfeit` (if available) or `submit`.
+Else, please continue with a new tool call!
+2026-01-22 05:30:13,575 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:30:13,584 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:18,353 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059813-J5Adh7zX77SbQfxTWzLt', created=1769059813, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content='', role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{}', name='submit'), id='34ef58b08cf548c7a53ea8a73c5d363c', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=35, prompt_tokens=2906, total_tokens=2941, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0012079, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0011624, 'upstream_inference_completions_cost': 4.55e-05}), provider='Novita')
+2026-01-22 05:30:18,371 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=2,042, output_tokens=0, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:18,371 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=8,281, total_tokens_received=697, total_cost=2.29, total_api_calls=7
+2026-01-22 05:30:18,371 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+
+
+🎬 ACTION
+submit
+2026-01-22 05:30:18,775 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:30:18,779 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+Thank you for your work on this issue. Please carefully follow the steps below to help review your changes.
+
+1. If you made any changes to your code after running the reproduction script, please run the reproduction script again.
+  If the reproduction script is failing, please revisit your changes and make sure they are correct.
+  If you have already removed your reproduction script, please ignore this step.
+2. Remove your reproduction script (if you haven't done so already).
+3. If you have modified any TEST files, please revert them to the state they had before you started fixing the issue.
+  You can do this with `git checkout -- /path/to/test/file.py`. Use below <diff> to find the files you need to revert.
+4. Run the submit command again to confirm.
+
+Here is a list of all of your changes:
+
+<diff>
+diff --git a/reproduce_as_expr.py b/reproduce_as_expr.py
+new file mode 100644
+index 0000000000..929084f3cd
+--- /dev/null
++++ b/reproduce_as_expr.py
+@@ -0,0 +1,6 @@
++from sympy import ring, ZZ, symbols
++
++R, x, y, z = ring("x,y,z", ZZ)
++f = 3*x**2*y - x*y*z + 7*z**3 + 1
++U, V, W = symbols("u,v,w")
++print(f.as_expr(U, V, W))
+\ No newline at end of file
+diff --git a/sympy/polys/rings.py b/sympy/polys/rings.py
+index 12bd2fc920..e92600caba 100644
+--- a/sympy/polys/rings.py
++++ b/sympy/polys/rings.py
+@@ -618,7 +618,7 @@ def set_ring(self, new_ring):
+     def as_expr(self, *symbols):
+         if symbols and len(symbols) != self.ring.ngens:
+             raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+-        else:
++        if not symbols:
+             symbols = self.ring.symbols
+ 
+         return expr_from_dict(self.as_expr_dict(), *symbols)
+
+</diff>
+
+
+2026-01-22 05:30:18,794 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 8 =========================
+2026-01-22 05:30:18,796 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:30:18,807 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:28,216 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059818-OdoRSGwpOM65iDp2nABr', created=1769059818, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content="The changes have been successfully implemented and verified. Here's the summary:\n\n1. **Reproduction Script**: Confirmed the fix works by running the script, which now correctly outputs `3*u**2*v - u*v*w + 7*w**3 + 1` (using the provided symbols U,V,W).\n\n2. **Code Changes**: The minimal change to `sympy/polys/rings.py` ensures that:\n   - Provided symbols are used when the count matches.\n   - Falls back to `self.ring.symbols` only when no symbols are provided.\n\n3. **Test Files**: As mentioned earlier, no test files were modified, so no reverting is needed.\n\n4. **Next Steps**:\n   - I will now remove the reproduction script (`/testbed/reproduce_as_expr.py`).\n   - Then, I will submit the changes for final confirmation.\n\nLet me proceed with these steps:\n\n1. Removing the reproduction script:\n\n2. Submitting the changes:\n\n", role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"rm /testbed/reproduce_as_expr.py"}', name='bash'), id='call_m1qmucw13yhqyfll89tm9iou', type='function'), ChatCompletionMessageToolCall(index=1, function=Function(arguments='{}', name='submit'), id='call_8f29zoi4p36l0roxcxi02d6g', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=243, prompt_tokens=2828, total_tokens=3071, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0014471, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0011312, 'upstream_inference_completions_cost': 0.0003159}), provider='Novita')
+2026-01-22 05:30:28,237 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=2,320, output_tokens=201, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:28,247 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=10,601, total_tokens_received=898, total_cost=2.30, total_api_calls=8
+2026-01-22 05:30:28,248 - WARNING - swea-agent-sympy__sympy-24539 - Requerying model after FunctionCallingFormatError (1th requery)
+2026-01-22 05:30:28,366 - WARNING - swea-agent-sympy__sympy-24539 - Your last output included multiple tool calls!
+Please make sure your output includes a thought and exactly _ONE_ function call.
+2026-01-22 05:30:28,408 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:30:28,415 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:32,886 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059828-INhlLMhhk6cByWNX4lLw', created=1769059828, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content="Apologies for the confusion. Let me proceed step by step.\n\nFirst, I'll remove the reproduction script `/testbed/reproduce_as_expr.py` since it's no longer needed. Here's the function call to delete it:", role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{"command":"rm /testbed/reproduce_as_expr.py"}', name='bash'), id='call_rx5m0nbluach3koljf0i1ijm', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=75, prompt_tokens=3059, total_tokens=3134, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=0, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0013211, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0012236, 'upstream_inference_completions_cost': 9.75e-05}), provider='Novita')
+2026-01-22 05:30:32,905 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=2,553, output_tokens=46, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:32,910 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=13,154, total_tokens_received=944, total_cost=2.30, total_api_calls=9
+2026-01-22 05:30:32,912 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+Apologies for the confusion. Let me proceed step by step.
+
+First, I'll remove the reproduction script `/testbed/reproduce_as_expr.py` since it's no longer needed. Here's the function call to delete it:
+
+🎬 ACTION
+rm /testbed/reproduce_as_expr.py
+2026-01-22 05:30:33,285 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:30:33,289 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+Your command ran successfully and did not produce any output.
+2026-01-22 05:30:33,311 - INFO - swea-agent-sympy__sympy-24539 - ========================= STEP 10 =========================
+2026-01-22 05:30:33,314 - DEBUG - swea-lm-sympy__sympy-24539 - n_cache_control: 2
+2026-01-22 05:30:33,326 - DEBUG - config-sympy__sympy-24539 - Choosing API key 0 for thread ThreadPoolExecutor-3_1 (idx 0)
+2026-01-22 05:30:36,249 - DEBUG - swea-lm-sympy__sympy-24539 - Response: ModelResponse(id='gen-1769059833-Sndf7uxI7GRWVMPIdYwE', created=1769059833, model='deepseek/deepseek-chat', object='chat.completion', system_fingerprint='', choices=[Choices(finish_reason='tool_calls', index=0, message=Message(content='', role='assistant', tool_calls=[ChatCompletionMessageToolCall(index=0, function=Function(arguments='{}', name='submit'), id='75a2278b564341de98f77d8c2d21975b', type='function')], function_call=None, provider_specific_fields={'refusal': None, 'reasoning': None}), provider_specific_fields={'native_finish_reason': 'tool_calls'})], usage=Usage(completion_tokens=36, prompt_tokens=3284, total_tokens=3320, completion_tokens_details=CompletionTokensDetailsWrapper(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=0, rejected_prediction_tokens=None, text_tokens=None, image_tokens=0), prompt_tokens_details=PromptTokensDetailsWrapper(audio_tokens=0, cached_tokens=1216, text_tokens=None, image_tokens=None, video_tokens=0), cost=0.0013604, is_byok=False, cost_details={'upstream_inference_cost': None, 'upstream_inference_prompt_cost': 0.0013136, 'upstream_inference_completions_cost': 4.68e-05}), provider='Novita')
+2026-01-22 05:30:36,254 - DEBUG - swea-lm-sympy__sympy-24539 - input_tokens=2,415, output_tokens=0, instance_cost=0.00, cost=0.00
+2026-01-22 05:30:36,255 - DEBUG - swea-lm-sympy__sympy-24539 - total_tokens_sent=15,569, total_tokens_received=944, total_cost=2.30, total_api_calls=10
+2026-01-22 05:30:36,255 - INFO - swea-agent-sympy__sympy-24539 - 💭 THOUGHT
+
+
+🎬 ACTION
+submit
+2026-01-22 05:30:36,636 - DEBUG - swea-tools-sympy__sympy-24539 - Retrieved state from environment: {'working_dir': '/testbed'}
+2026-01-22 05:30:36,646 - INFO - swea-agent-sympy__sympy-24539 - Found submission: diff --git a/sympy/polys/rings.py b/sympy/polys/rings.py
+index 12bd2fc920..e92600caba 100644
+--- a/sympy/polys/rings.py
++++ b/sympy/polys/rings.py
+@@ -618,7 +618,7 @@ def set_ring(self, new_ring):
+     def as_expr(self, *symbols):
+         if symbols and len(symbols) != self.ring.ngens:
+             raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+-        else:
++        if not symbols:
+             symbols = self.ring.symbols
+ 
+         return expr_from_dict(self.as_expr_dict(), *symbols)
+
+2026-01-22 05:30:36,649 - INFO - swea-agent-sympy__sympy-24539 - 🤖 MODEL INPUT
+OBSERVATION:
+diff --git a/sympy/polys/rings.py b/sympy/polys/rings.py
+index 12bd2fc920..e92600caba 100644
+--- a/sympy/polys/rings.py
++++ b/sympy/polys/rings.py
+@@ -618,7 +618,7 @@ def set_ring(self, new_ring):
+     def as_expr(self, *symbols):
+         if symbols and len(symbols) != self.ring.ngens:
+             raise ValueError("not enough symbols, expected %s got %s" % (self.ring.ngens, len(symbols)))
+-        else:
++        if not symbols:
+             symbols = self.ring.symbols
+ 
+         return expr_from_dict(self.as_expr_dict(), *symbols)
+
+2026-01-22 05:30:36,692 - INFO - swea-agent-sympy__sympy-24539 - Trajectory saved to all_instances/sympy__sympy-24539/sympy__sympy-24539.traj
+2026-01-22 05:30:36,701 - INFO - swea-env-sympy__sympy-24539 - Beginning environment shutdown...
+2026-01-22 05:30:37,081 - DEBUG - rex-deploy-sympy__sympy-24539 - Ensuring deployment is stopped because object is deleted
