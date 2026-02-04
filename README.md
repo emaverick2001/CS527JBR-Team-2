@@ -1,7 +1,7 @@
 # CS527JBR-Team-0
 
 ## Group members
-- [Team member1], [NetID]
-- [Team member2], [NetID]
-- [Team member3], [NetID]
+- Maverick Espinosa, mae10
+- Ajmal Ali, aali274
+- Muneeb Hoda, shoda6
 - [Team member4], [NetID]
