@@ -94,9 +94,11 @@
         "mypy runs",
         "django-stubs PR #1601",
         "diff reference: R63-R64",
-        "clear_cache doc: \"Clear all internal caches\"",
+        ".clear_cache doc states: Clear all internal caches",
         "proposed fix: self.get_swappable_settings_name.cache_clear()",
-        "original discussion comment: discussion_r1246344533"
+        "original discussion comment: discussion_r1246344533",
+        "https://github.com/typeddjango/django-stubs/pull/1601/files#diff-c49d8fe2cd0a58fad3c36ab3a88c7745e9622f3098e60cd512953eb17b8a1994R63-R64",
+
     ],
     "pylint-dev__pylint-7277": [
         "pylint",
