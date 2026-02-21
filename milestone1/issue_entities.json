@@ -78,11 +78,12 @@
         "Waiter.restaurant = models.ForeignKey(Restaurant, models.CASCADE)",
         "WaiterAdmin",
         "list_filter",
-        "lookup: 'restaurant__place__country'",
+        "lookups for 'restaurant__place__country'",
         "ma.lookup_allowed('restaurant__place__country', 'test_value')",
         "admin confuses FK primary key with concrete inheritance",
         "shortcut lookup to 'restaurant__country'",
-        "cannot add 'restaurant__country' to list_filter"
+        "cannot add 'restaurant__country' to list_filter",
+        "def test_lookup_allowed_foreign_primary(self):\n\tclass Country(models.Model):\n\t\tname = models.CharField(max_length=256)\n\tclass Place(models.Model):\n\t\tcountry = models.ForeignKey(Country, models.CASCADE)\n\tclass Restaurant(models.Model):\n\t\tplace = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n\tclass Waiter(models.Model):\n\t\trestaurant = models.ForeignKey(Restaurant, models.CASCADE)\n\tclass WaiterAdmin(ModelAdmin):\n\t\tlist_filter = [\n\t\t\t'restaurant__place__country',\n\t\t]\n\tma = WaiterAdmin(Waiter, self.site)\n\tself.assertIs(ma.lookup_allowed('restaurant__place__country', 'test_value'), True)",
     ],
     "django__django-17029": [
         "apps.clear_cache",
