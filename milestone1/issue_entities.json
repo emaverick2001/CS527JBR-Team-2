@@ -116,7 +116,10 @@
         "expected check for os.getcwd()",
         "pylint extension bundles libraries",
         "extension adds libraries to sys.path",
-        "pylint version 2.14.5"
+        "pylint version 2.14.5",
+        "https://github.com/PyCQA/pylint/blob/ce7cccf96454fb6e286e4a8f38919733a0f28f44/pylint/__init__.py#L99",
+        "os.getcwd()",
+        "import sys\r\nimport runpy\r\n\r\nsys.path.insert(0, \"something\")\r\n\r\nrunpy.run_module('pylint', run_name=\"__main__\", alter_sys=True)"
     ],
     "sphinx-doc__sphinx-11510": [
         "source-read event",
