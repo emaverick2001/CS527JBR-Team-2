@@ -218,7 +218,12 @@
         "operations.py#L49",
         "forced 'UTC' in conversion",
         "docs reference: settings TIME_ZONE",
-        "docs reference: queryset __date"
+        "docs reference: queryset __date",
+        "settings.py",
+        "'ENGINE': 'django.db.backends.mysql'",
+        "manage.py",
+        "dt = timezone.make_aware(datetime.datetime(2017, 7, 6, 20, 50))",
+        "SELECT (1) AS `a` FROM `my_model` WHERE DATE(CONVERT_TZ(`my_model`.`my_datetime_field`, 'UTC', 'Europe/Paris')) = '2017-07-06' LIMIT 1;"
     ],
     "django__django-11141": [
         "migrations directories without __init__.py",
