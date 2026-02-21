@@ -181,7 +181,8 @@
         "pyerfa 2.0.0.1",
         "astropy 5.0.3",
         "Scipy 1.8.0",
-        "Matplotlib 3.5.1"
+        "Matplotlib 3.5.1",
+        "from astropy.time import Time\r\nfrom astropy.timeseries import TimeSeries\r\n\r\ntime=Time(np.arange(100000, 100003), format='jd')\r\nts = TimeSeries(time=time, data = {\"flux\": [99.9, 99.8, 99.7]})\r\nts._required_columns = [\"time\", \"flux\"]\r\nts.remove_column(\"flux\")"
     ],
     "django__django-11138": [
         "TIME_ZONE (DATABASES setting)",
