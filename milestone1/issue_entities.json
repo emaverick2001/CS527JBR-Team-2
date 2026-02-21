@@ -150,7 +150,9 @@
         "replacement does not reach final HTML",
         "OS: Linux",
         "Python 3.10",
-        "Sphinx extensions: custom extension using source-read event"
+        "Sphinx extensions: custom extension using source-read event",
+        "something-to-include.rst",
+        "HTML"
     ]
   },
   "deepseek-v3": {
