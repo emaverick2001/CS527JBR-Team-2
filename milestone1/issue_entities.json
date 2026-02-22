@@ -410,7 +410,10 @@
         "expected signature: MyEnum.ValueA",
         "actual signature: <MyEnum.ValueA: 10>",
         "minimal reproduction repository: sphinx_issue_ugly_enum",
-        "make html build process"
+        "make html build process",
+        "git clone git@github.com:sidneycadot/sphinx_issue_ugly_enum.git\r\n$ cd sphinx_issue_ugly_enum/\r\n$ make html\r\n$ firefox build/html/index.html",
+        "Python version: 3.9.5",
+        "Sphinx version: 4.0.2"
     ],
     "sympy__sympy-14531": [
         "StrPrinter",
