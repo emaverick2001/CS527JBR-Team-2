@@ -368,7 +368,6 @@
         "matplotlib 3.0.3",
         "pip 19.0.3",
         "conda 4.6.8",
-        "method",
         "import numpy as np\r\nfrom xarray import DataArray\r\nempty = np.zeros((2,2))\r\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\r\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\r\n\r\nprint(D1.loc[dict(dim1='x', dim2='a')])    # works\r\nprint(D2.loc[dict(dim1='x', method='a')])",
         "xarray: 0.12.0"
     ],
@@ -390,7 +389,10 @@
         "expected values: \"\"",
         "expected values: \".\"",
         "expected values: os.getcwd()",
-        "proposed fix: conditional removal of sys.path[0]"
+        "proposed fix: conditional removal of sys.path[0]",
+        "os.getcwd()",
+        "https://github.com/PyCQA/pylint/blob/ce7cccf96454fb6e286e4a8f38919733a0f28f44/pylint/__init__.py#L99",
+        "import sys\r\nimport runpy\r\n\r\nsys.path.insert(0, \"something\")\r\n\r\nrunpy.run_module('pylint', run_name=\"__main__\", alter_sys=True)"
     ],
     "sphinx-doc__sphinx-9281": [
         "Sphinx",
