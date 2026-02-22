@@ -367,7 +367,10 @@
         "scipy 1.2.1",
         "matplotlib 3.0.3",
         "pip 19.0.3",
-        "conda 4.6.8"
+        "conda 4.6.8",
+        "method",
+        "import numpy as np\r\nfrom xarray import DataArray\r\nempty = np.zeros((2,2))\r\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\r\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\r\n\r\nprint(D1.loc[dict(dim1='x', dim2='a')])    # works\r\nprint(D2.loc[dict(dim1='x', method='a')])",
+        "xarray: 0.12.0"
     ],
     "pylint-dev__pylint-7277": [
         "pylint",
