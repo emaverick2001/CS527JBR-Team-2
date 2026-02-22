@@ -279,7 +279,11 @@
         "prepare_value",
         "json.dumps",
         "InvalidJSONInput",
-        "proposed fix: special case for JSONField in display_for_field"
+        "proposed fix: special case for JSONField in display_for_field",
+        "dict",
+        "admin",
+        "JSON",
+        "add a special case in django.contrib.admin.utils.display_for_field to call the prepare_value of the JSONField"
     ],
     "django__django-14351": [
         "Q object",
