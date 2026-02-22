@@ -335,7 +335,8 @@
         "unique_together={(\"col\",)}",
         "index_together={(\"col\",)}",
         "optimization: collapse two-step remove+add into single final constraint state",
-        "goal: avoid doing two operations per constraint"
+        "goal: avoid doing two operations per constraint",
+        "operations = [\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together=set(),\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together=set(),\n\t ),\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together={(\"col\",)},\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together={(\"col\",)},\n\t ),\n ]\nshould be optimized to\n operations = [\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together={(\"col\",)},\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together={(\"col\",)}"
     ],
     "pydata__xarray-4695": [
         "xarray",
