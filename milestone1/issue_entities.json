@@ -11,7 +11,7 @@
       "database backend"
     ],
     "django__django-13109": [
-        "ForeignKey.validate",
+        "ForeignKey.validate()",
         "_base_manager",
         "_default_manager",
         "class ArticleManager(models.Manage):\n\tdef get_queryset(self):\n\t\tqs = super().get_queryset()\n\t\treturn qs.filter(archived=False)\nclass Article(models.Model):\n\ttitle = models.CharField(max_length=100)\n\tarchived = models.BooleanField(default=False)\n\t# Don't include archived articles by default.\n\tobjects = ArticleManager()\nclass FavoriteAricles(models.Model):\n\tarticle = models.ForeignKey(Article, on_delete=models.CASCADE)", 
@@ -62,7 +62,7 @@
         "avoid using __file__"
     ],
     "django__django-16661": [
-        "ModelAdmin.lookup_allowed",
+        "ModelAdmin.lookup_allowed()",
         "DisallowedModelAdminLookup",
         "foreign key as primary key",
         "tests/modeladmin/tests.py",
@@ -86,7 +86,7 @@
         "def test_lookup_allowed_foreign_primary(self):\n\tclass Country(models.Model):\n\t\tname = models.CharField(max_length=256)\n\tclass Place(models.Model):\n\t\tcountry = models.ForeignKey(Country, models.CASCADE)\n\tclass Restaurant(models.Model):\n\t\tplace = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n\tclass Waiter(models.Model):\n\t\trestaurant = models.ForeignKey(Restaurant, models.CASCADE)\n\tclass WaiterAdmin(ModelAdmin):\n\t\tlist_filter = [\n\t\t\t'restaurant__place__country',\n\t\t]\n\tma = WaiterAdmin(Waiter, self.site)\n\tself.assertIs(ma.lookup_allowed('restaurant__place__country', 'test_value'), True)",
     ],
     "django__django-17029": [
-        "apps.clear_cache",
+        "apps.clear_cache()",
         "get_swappable_settings_name",
         "functools._lru_cache_wrapper",
         "cache not cleared",
@@ -261,7 +261,7 @@
         "third-party related report: django-activity-stream issue #245",
         "GFK",
         "UUID",
-        "class Foo(models.Model):\n\tid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)\n\t...\ncreate another model with GFK to model Foo\nclass Bar(models.Model):\n\tfoo_content_type = models.ForeignKey(\n\t\tContentType, related_name='actor',\n\t\ton_delete=models.CASCADE, db_index=True\n\t)\n\tfoo_object_id = models.CharField(max_length=255, db_index=True)\n\tfoo = GenericForeignKey('foo_content_type', 'foo_object_id')",
+        "class Foo(models.Model):\n\tid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)\n class Bar(models.Model):\n\tfoo_content_type = models.ForeignKey(\n\t\tContentType, related_name='actor',\n\t\ton_delete=models.CASCADE, db_index=True\n\t)\n\tfoo_object_id = models.CharField(max_length=255, db_index=True)\n\tfoo = GenericForeignKey('foo_content_type', 'foo_object_id')",
         "django orm engine",
         "https://github.com/justquick/django-activity-stream/issues/245"
     ],
