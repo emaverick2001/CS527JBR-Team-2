@@ -1,5 +1,15 @@
 ## Observations on Issue Description Quality vs. Resolution Status
 
-Across the analyzed trajectories, there appears to be a meaningful relationship between the richness of the issue description and the likelihood of successful resolution. Issues that include concrete error messages, minimal reproducible examples, version numbers, stack traces, and clearly separated expected vs. actual behavior tend to be resolved more reliably. For example, issues that provide executable snippets and explicit failure outputs reduce ambiguity and allow the agent to directly reproduce the bug and reason about its root cause.
 
-In contrast, issues that are more conceptual or architectural in nature — such as migration optimizations or internal query planning behavior — often require deeper reasoning about framework internals and implicit assumptions. Even when these issues are detailed, they sometimes lack a minimal failing test case, which increases uncertainty during debugging. These types of issues appear more challenging for agentic systems to resolve consistently. Overall, a higher density of well-defined entities — especially those tied to APIs, stack traces, reproduction steps, and specific file locations — correlates with clearer problem boundaries and a higher probability of successful resolution.
+From an initial inspection, there appears to be a relationship between the number of entities mentioned in the issue description and the resolution status of the trajectory. Successful trajectories tend to have fewer entities listed in their PR descriptions compared to failed trajectories. This trend is also visible in the violin plots, where successful cases generally show a lower count of extracted entities.
+
+![Number of entitiy plot](milestone1/Unknown.png)
+
+However, this difference seems to be largely explained by the length of the PR descriptions themselves. Successful trajectories tend to have shorter descriptions overall, which naturally leads to fewer extracted entities. When we normalize this by examining the density of entities relative to the number of characters in the PR description, the distinction between successful and failed trajectories becomes much smaller. 
+![Length of PR Description plot](milestone1/Unknown-2.png)
+
+The violin plots of entity density show significant overlap, and the Kullback–Leibler (KL) divergence between the two distributions is only 0.087, indicating that they are nearly identical. This suggests that the raw number of entities alone may be misleading. It could incorrectly imply that AI agents perform better on tasks with fewer entities, when in reality the difference may simply reflect shorter issue descriptions rather than a meaningful change in task complexity.
+![Density of entity/character in PR description](milestone1/Unknown-3.png)
+
+
+Additionally, there are likely other confounding factors influencing the success rate of AI agents, such as the inherent difficulty of the issue, the clarity of the problem statement, or the complexity of the required code changes. Therefore, entity count by itself may not be a reliable indicator of whether a trajectory will be successful.
