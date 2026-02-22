@@ -437,7 +437,7 @@
     ],
     "sympy__sympy-24443": [
         "_check_homomorphism",
-        "PermutationGroup",
+        "PermutationGroups",
         "sympy.combinatorics",
         "homomorphism",
         "DihedralGroup(3)",
@@ -451,7 +451,9 @@
         "sympy/combinatorics/homomorphisms.py#L336-L337",
         "bug in handling inverted generators",
         "homomorphism validation failure",
-        "simplification suggested"
+        "simplification suggested",
+        "from sympy.combinatorics import *\r\n   ...: from sympy.combinatorics.homomorphisms import homomorphism\r\n   ...: D3 = DihedralGroup(3)\r\n   ...: T = homomorphism(D3, D3, D3.generators, D3.generators)",
+        "_image()"
     ],
     "sympy__sympy-24539": [
         "PolyElement.as_expr",
