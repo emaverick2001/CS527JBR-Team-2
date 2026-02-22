@@ -312,7 +312,8 @@
         "PropertyGroup.objects.agent_groups(management_agent)",
         "annotate(Count(\"agent__property_groups\"))",
         "manager_managementagentpropertygroup",
-        "property_propertygroup"
+        "property_propertygroup",
+        "django.db.utils.ProgrammingError: subquery must return only one column"
     ],
     "django__django-15268": [
         "Optimize multiple AlterFooTogether operations into one",
