@@ -11,15 +11,17 @@
       "database backend"
     ],
     "django__django-13109": [
-        "ForeignKey.validate",
+        "ForeignKey.validate()",
         "_base_manager",
         "_default_manager",
+        "class ArticleManager(models.Manage):\n\tdef get_queryset(self):\n\t\tqs = super().get_queryset()\n\t\treturn qs.filter(archived=False)\nclass Article(models.Model):\n\ttitle = models.CharField(max_length=100)\n\tarchived = models.BooleanField(default=False)\n\t# Don't include archived articles by default.\n\tobjects = ArticleManager()\nclass FavoriteAricles(models.Model):\n\tarticle = models.ForeignKey(Article, on_delete=models.CASCADE)", 
         "ArticleManager",
         "ArticleManager.get_queryset",
         "qs.filter(archived=False)",
         "Article",
         "Article.archived",
         "Article.objects = ArticleManager()",
+        "class FavoriteAriclesForm(forms.ModelForm):\n\tclass Meta:\n\t\tmodel = FavoriteArticle\n\t\tfields = '__all__'\n\tdef __init__(self, *args, **kwargs):\n\t\tsuper().__init__(*args, **kwargs)\n\t\t# Use the base manager instead of the default manager to allow archived articles.\n\t\tself.fields['article'].queryset = Article._base_manager.all()",
         "FavoriteAricles",
         "FavoriteAricles.article = models.ForeignKey(Article, on_delete=models.CASCADE)",
         "FavoriteAriclesForm",
@@ -30,10 +32,10 @@
         "Article._base_manager.all()",
         "archived article selection",
         "validation fails for archived article",
-        "user-facing error: \"article instance with id 123 does not exist.\"",
+        "article instance with id 123 does not exist.", 
         "django/db/models/fields/related.py",
-        "related.py#L917-L919",
-        "suggested fix: use _base_manager instead of _default_manager"
+        "https://github.com/django/django/blob/94f63b926fd32d7a7b6e2591ef72aa8f040f25cc/django/db/models/fields/related.py#L917-L919",
+        "ForeignKey validation should use the _base_manager instead which does not include the default filters"
     ],
     "django__django-13837": [
         "django.utils.autoreload.get_child_arguments",
@@ -50,13 +52,17 @@
         "directory / zipfile sys.path entry",
         "__main__.py",
         "runserver",
+        "get_child_arguments",
+        "directory",
+        "zipfile",
+        "sys.path",
         "override Django management commands",
         "reference: #32177",
         "proposed algorithm: __main__.__spec__.parent == \"pkg\"",
         "avoid using __file__"
     ],
     "django__django-16661": [
-        "ModelAdmin.lookup_allowed",
+        "ModelAdmin.lookup_allowed()",
         "DisallowedModelAdminLookup",
         "foreign key as primary key",
         "tests/modeladmin/tests.py",
@@ -72,14 +78,15 @@
         "Waiter.restaurant = models.ForeignKey(Restaurant, models.CASCADE)",
         "WaiterAdmin",
         "list_filter",
-        "lookup: 'restaurant__place__country'",
+        "lookups for 'restaurant__place__country'",
         "ma.lookup_allowed('restaurant__place__country', 'test_value')",
         "admin confuses FK primary key with concrete inheritance",
         "shortcut lookup to 'restaurant__country'",
-        "cannot add 'restaurant__country' to list_filter"
+        "cannot add 'restaurant__country' to list_filter",
+        "def test_lookup_allowed_foreign_primary(self):\n\tclass Country(models.Model):\n\t\tname = models.CharField(max_length=256)\n\tclass Place(models.Model):\n\t\tcountry = models.ForeignKey(Country, models.CASCADE)\n\tclass Restaurant(models.Model):\n\t\tplace = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n\tclass Waiter(models.Model):\n\t\trestaurant = models.ForeignKey(Restaurant, models.CASCADE)\n\tclass WaiterAdmin(ModelAdmin):\n\t\tlist_filter = [\n\t\t\t'restaurant__place__country',\n\t\t]\n\tma = WaiterAdmin(Waiter, self.site)\n\tself.assertIs(ma.lookup_allowed('restaurant__place__country', 'test_value'), True)"
     ],
     "django__django-17029": [
-        "apps.clear_cache",
+        "apps.clear_cache()",
         "get_swappable_settings_name",
         "functools._lru_cache_wrapper",
         "cache not cleared",
@@ -87,9 +94,11 @@
         "mypy runs",
         "django-stubs PR #1601",
         "diff reference: R63-R64",
-        "clear_cache doc: \"Clear all internal caches\"",
+        ".clear_cache doc states: Clear all internal caches",
         "proposed fix: self.get_swappable_settings_name.cache_clear()",
-        "original discussion comment: discussion_r1246344533"
+        "original discussion comment: discussion_r1246344533",
+        "https://github.com/typeddjango/django-stubs/pull/1601/files#diff-c49d8fe2cd0a58fad3c36ab3a88c7745e9622f3098e60cd512953eb17b8a1994R63-R64"
+
     ],
     "pylint-dev__pylint-7277": [
         "pylint",
@@ -107,7 +116,10 @@
         "expected check for os.getcwd()",
         "pylint extension bundles libraries",
         "extension adds libraries to sys.path",
-        "pylint version 2.14.5"
+        "pylint version 2.14.5",
+        "https://github.com/PyCQA/pylint/blob/ce7cccf96454fb6e286e4a8f38919733a0f28f44/pylint/__init__.py#L99",
+        "os.getcwd()",
+        "import sys\r\nimport runpy\r\n\r\nsys.path.insert(0, \"something\")\r\n\r\nrunpy.run_module('pylint', run_name=\"__main__\", alter_sys=True)"
     ],
     "sphinx-doc__sphinx-11510": [
         "source-read event",
@@ -138,7 +150,9 @@
         "replacement does not reach final HTML",
         "OS: Linux",
         "Python 3.10",
-        "Sphinx extensions: custom extension using source-read event"
+        "Sphinx extensions: custom extension using source-read event",
+        "something-to-include.rst",
+        "HTML"
     ]
   },
   "deepseek-v3": {
@@ -167,7 +181,8 @@
         "pyerfa 2.0.0.1",
         "astropy 5.0.3",
         "Scipy 1.8.0",
-        "Matplotlib 3.5.1"
+        "Matplotlib 3.5.1",
+        "from astropy.time import Time\r\nfrom astropy.timeseries import TimeSeries\r\n\r\ntime=Time(np.arange(100000, 100003), format='jd')\r\nts = TimeSeries(time=time, data = {\"flux\": [99.9, 99.8, 99.7]})\r\nts._required_columns = [\"time\", \"flux\"]\r\nts.remove_column(\"flux\")"
     ],
     "django__django-11138": [
         "TIME_ZONE (DATABASES setting)",
@@ -203,7 +218,13 @@
         "operations.py#L49",
         "forced 'UTC' in conversion",
         "docs reference: settings TIME_ZONE",
-        "docs reference: queryset __date"
+        "docs reference: queryset __date",
+        "settings.py",
+        "'ENGINE': 'django.db.backends.mysql'",
+        "manage.py",
+        "dt = timezone.make_aware(datetime.datetime(2017, 7, 6, 20, 50))",
+        "SELECT (1) AS `a` FROM `my_model` WHERE DATE(CONVERT_TZ(`my_model`.`my_datetime_field`, 'UTC', 'Europe/Paris')) = '2017-07-06' LIMIT 1;",
+        "USE_TZ"
     ],
     "django__django-11141": [
         "migrations directories without __init__.py",
@@ -237,7 +258,12 @@
         "Bar.objects.all().prefetch_related('foo')",
         "django ORM returns None for attribute foo",
         "reproduction steps",
-        "third-party related report: django-activity-stream issue #245"
+        "third-party related report: django-activity-stream issue #245",
+        "GFK",
+        "UUID",
+        "class Foo(models.Model):\n\tid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)\n class Bar(models.Model):\n\tfoo_content_type = models.ForeignKey(\n\t\tContentType, related_name='actor',\n\t\ton_delete=models.CASCADE, db_index=True\n\t)\n\tfoo_object_id = models.CharField(max_length=255, db_index=True)\n\tfoo = GenericForeignKey('foo_content_type', 'foo_object_id')",
+        "django orm engine",
+        "https://github.com/justquick/django-activity-stream/issues/245"
     ],
     "django__django-12308": [
         "JSONField",
@@ -253,7 +279,11 @@
         "prepare_value",
         "json.dumps",
         "InvalidJSONInput",
-        "proposed fix: special case for JSONField in display_for_field"
+        "proposed fix: special case for JSONField in display_for_field",
+        "dict",
+        "admin",
+        "JSON",
+        "add a special case in django.contrib.admin.utils.display_for_field to call the prepare_value of the JSONField"
     ],
     "django__django-14351": [
         "Q object",
@@ -282,7 +312,8 @@
         "PropertyGroup.objects.agent_groups(management_agent)",
         "annotate(Count(\"agent__property_groups\"))",
         "manager_managementagentpropertygroup",
-        "property_propertygroup"
+        "property_propertygroup",
+        "django.db.utils.ProgrammingError: subquery must return only one column"
     ],
     "django__django-15268": [
         "Optimize multiple AlterFooTogether operations into one",
@@ -304,7 +335,8 @@
         "unique_together={(\"col\",)}",
         "index_together={(\"col\",)}",
         "optimization: collapse two-step remove+add into single final constraint state",
-        "goal: avoid doing two operations per constraint"
+        "goal: avoid doing two operations per constraint",
+        "operations = [\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together=set(),\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together=set(),\n\t ),\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together={(\"col\",)},\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together={(\"col\",)},\n\t ),\n ]\nshould be optimized to\n operations = [\n\t migrations.AlterUniqueTogether(\n\t\t name='mymodel',\n\t\t unique_together={(\"col\",)},\n\t ),\n\t migrations.AlterIndexTogether(\n\t\t name='mymodel',\n\t\t index_together={(\"col\",)}"
     ],
     "pydata__xarray-4695": [
         "xarray",
@@ -335,7 +367,9 @@
         "scipy 1.2.1",
         "matplotlib 3.0.3",
         "pip 19.0.3",
-        "conda 4.6.8"
+        "conda 4.6.8",
+        "import numpy as np\r\nfrom xarray import DataArray\r\nempty = np.zeros((2,2))\r\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\r\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\r\n\r\nprint(D1.loc[dict(dim1='x', dim2='a')])    # works\r\nprint(D2.loc[dict(dim1='x', method='a')])",
+        "xarray: 0.12.0"
     ],
     "pylint-dev__pylint-7277": [
         "pylint",
@@ -355,7 +389,10 @@
         "expected values: \"\"",
         "expected values: \".\"",
         "expected values: os.getcwd()",
-        "proposed fix: conditional removal of sys.path[0]"
+        "proposed fix: conditional removal of sys.path[0]",
+        "os.getcwd()",
+        "https://github.com/PyCQA/pylint/blob/ce7cccf96454fb6e286e4a8f38919733a0f28f44/pylint/__init__.py#L99",
+        "import sys\r\nimport runpy\r\n\r\nsys.path.insert(0, \"something\")\r\n\r\nrunpy.run_module('pylint', run_name=\"__main__\", alter_sys=True)"
     ],
     "sphinx-doc__sphinx-9281": [
         "Sphinx",
@@ -373,7 +410,10 @@
         "expected signature: MyEnum.ValueA",
         "actual signature: <MyEnum.ValueA: 10>",
         "minimal reproduction repository: sphinx_issue_ugly_enum",
-        "make html build process"
+        "make html build process",
+        "git clone git@github.com:sidneycadot/sphinx_issue_ugly_enum.git\r\n$ cd sphinx_issue_ugly_enum/\r\n$ make html\r\n$ firefox build/html/index.html",
+        "Python version: 3.9.5",
+        "Sphinx version: 4.0.2"
     ],
     "sympy__sympy-14531": [
         "StrPrinter",
@@ -397,7 +437,7 @@
     ],
     "sympy__sympy-24443": [
         "_check_homomorphism",
-        "PermutationGroup",
+        "PermutationGroups",
         "sympy.combinatorics",
         "homomorphism",
         "DihedralGroup(3)",
@@ -411,10 +451,12 @@
         "sympy/combinatorics/homomorphisms.py#L336-L337",
         "bug in handling inverted generators",
         "homomorphism validation failure",
-        "simplification suggested"
+        "simplification suggested",
+        "from sympy.combinatorics import *\r\n   ...: from sympy.combinatorics.homomorphisms import homomorphism\r\n   ...: D3 = DihedralGroup(3)\r\n   ...: T = homomorphism(D3, D3, D3.generators, D3.generators)",
+        "_image()"
     ],
     "sympy__sympy-24539": [
-        "PolyElement.as_expr",
+        "PolyElement.as_expr()",
         "as_expr() not accepting symbols",
         "sympy.polys.rings",
         "rings.py#L618-L624",
@@ -428,8 +470,9 @@
         "expected symbol substitution",
         "actual output uses original ring symbols",
         "ZZ domain",
-        "polynomial ring conversion issue"
+        "polynomial ring conversion issue",
+        "https://github.com/sympy/sympy/blob/193e3825645d93c73e31cdceb6d742cc6919624d/sympy/polys/rings.py#L618-L62",
+        "from sympy import ring, ZZ, symbols\n R, x, y, z = ring(\"x,y,z\", ZZ)\n f = 3*x**2*y - x*y*z + 7*z**3 + 1\n  U, V, W = symbols(\"u,v,w\")\n f.as_expr(U, V, W)\r\n3*x**2*y - x*y*z + 7*z**3 + 1"
     ]
   }
 }
-
