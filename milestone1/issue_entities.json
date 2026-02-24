@@ -83,7 +83,7 @@
         "admin confuses FK primary key with concrete inheritance",
         "shortcut lookup to 'restaurant__country'",
         "cannot add 'restaurant__country' to list_filter",
-        "def test_lookup_allowed_foreign_primary(self):\n\tclass Country(models.Model):\n\t\tname = models.CharField(max_length=256)\n\tclass Place(models.Model):\n\t\tcountry = models.ForeignKey(Country, models.CASCADE)\n\tclass Restaurant(models.Model):\n\t\tplace = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n\tclass Waiter(models.Model):\n\t\trestaurant = models.ForeignKey(Restaurant, models.CASCADE)\n\tclass WaiterAdmin(ModelAdmin):\n\t\tlist_filter = [\n\t\t\t'restaurant__place__country',\n\t\t]\n\tma = WaiterAdmin(Waiter, self.site)\n\tself.assertIs(ma.lookup_allowed('restaurant__place__country', 'test_value'), True)"
+        "def test_lookup_allowed_foreign_primary(self):\n\tclass Country(models.Model):\n\t\tname = models.CharField(max_length=256)\n\tclass Place(models.Model):\n\t\tcountry = models.ForeignKey(Country, models.CASCADE)\n\tclass Restaurant(models.Model):\n\t\tplace = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n\tclass Waiter(models.Model):\n\t\trestaurant = models.ForeignKey(Restaurant, models.CASCADE)\n\tclass WaiterAdmin(ModelAdmin):\n\t\tlist_filter = [\n\t\t\t'restaurant__place__country',\n\t\t]\n\tma = WaiterAdmin(Waiter, self.site)\n\tself.assertIs(ma.lookup_allowed('restaurant__place__country', 'test_value'), True)",
     ],
     "django__django-17029": [
         "apps.clear_cache()",
@@ -97,7 +97,7 @@
         ".clear_cache doc states: Clear all internal caches",
         "proposed fix: self.get_swappable_settings_name.cache_clear()",
         "original discussion comment: discussion_r1246344533",
-        "https://github.com/typeddjango/django-stubs/pull/1601/files#diff-c49d8fe2cd0a58fad3c36ab3a88c7745e9622f3098e60cd512953eb17b8a1994R63-R64"
+        "https://github.com/typeddjango/django-stubs/pull/1601/files#diff-c49d8fe2cd0a58fad3c36ab3a88c7745e9622f3098e60cd512953eb17b8a1994R63-R64",
 
     ],
     "pylint-dev__pylint-7277": [
@@ -242,7 +242,7 @@
         "implicit namespace packages",
         "namespace packages (implicit or otherwise)",
         "result: __file__ check prevents migrate from working",
-        "related work: #29091"
+        "related work: #29091",
     ],
     "django__django-11211": [
         "prefetch_related",
