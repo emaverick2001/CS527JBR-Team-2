@@ -1,0 +1,8 @@
+THOUGHT:
+
+
+ACTION:
+grep -n "class PermutationGroup" -n sympy/combinatorics -R || true
+
+OBSERVATION:
+sympy/combinatorics/perm_groups.py:26:class PermutationGroup(Basic):

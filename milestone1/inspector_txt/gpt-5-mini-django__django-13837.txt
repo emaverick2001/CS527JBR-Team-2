@@ -1,0 +1,288 @@
+THOUGHT:
+
+
+ACTION:
+sed -n '240,520p' /testbed/django/utils/autoreload.py
+
+OBSERVATION:
+            # TODO: Remove str() when dropping support for PY37.
+            # args parameter accepts path-like on Windows from Python 3.8.
+            return [*args, str(script_entrypoint), *sys.argv[1:]]
+        raise RuntimeError('Script %s does not exist.' % py_script)
+    else:
+        args += sys.argv
+    return args
+
+
+def trigger_reload(filename):
+    logger.info('%s changed, reloading.', filename)
+    sys.exit(3)
+
+
+def restart_with_reloader():
+    new_environ = {**os.environ, DJANGO_AUTORELOAD_ENV: 'true'}
+    args = get_child_arguments()
+    while True:
+        p = subprocess.run(args, env=new_environ, close_fds=False)
+        if p.returncode != 3:
+            return p.returncode
+
+
+class BaseReloader:
+    def __init__(self):
+        self.extra_files = set()
+        self.directory_globs = defaultdict(set)
+        self._stop_condition = threading.Event()
+
+    def watch_dir(self, path, glob):
+        path = Path(path)
+        try:
+            path = path.absolute()
+        except FileNotFoundError:
+            logger.debug(
+                'Unable to watch directory %s as it cannot be resolved.',
+                path,
+                exc_info=True,
+            )
+            return
+        logger.debug('Watching dir %s with glob %s.', path, glob)
+        self.directory_globs[path].add(glob)
+
+    def watched_files(self, include_globs=True):
+        """
+        Yield all files that need to be watched, including module files and
+        files within globs.
+        """
+        yield from iter_all_python_module_files()
+        yield from self.extra_files
+        if include_globs:
+            for directory, patterns in self.directory_globs.items():
+                for pattern in patterns:
+                    yield from directory.glob(pattern)
+
+    def wait_for_apps_ready(self, app_reg, django_main_thread):
+        """
+        Wait until Django reports that the apps have been loaded. If the given
+        thread has terminated before the apps are ready, then a SyntaxError or
+        other non-recoverable error has been raised. In that case, stop waiting
+        for the apps_ready event and continue processing.
+
+        Return True if the thread is alive and the ready event has been
+        triggered, or False if the thread is terminated while waiting for the
+        event.
+        """
+        while django_main_thread.is_alive():
+            if app_reg.ready_event.wait(timeout=0.1):
+                return True
+        else:
+            logger.debug('Main Django thread has terminated before apps are ready.')
+            return False
+
+    def run(self, django_main_thread):
+        logger.debug('Waiting for apps ready_event.')
+        self.wait_for_apps_ready(apps, django_main_thread)
+        from django.urls import get_resolver
+
+        # Prevent a race condition where URL modules aren't loaded when the
+        # reloader starts by accessing the urlconf_module property.
+        try:
+            get_resolver().urlconf_module
+        except Exception:
+            # Loading the urlconf can result in errors during development.
+            # If this occurs then swallow the error and continue.
+            pass
+        logger.debug('Apps ready_event triggered. Sending autoreload_started signal.')
+        autoreload_started.send(sender=self)
+        self.run_loop()
+
+    def run_loop(self):
+        ticker = self.tick()
+        while not self.should_stop:
+            try:
+                next(ticker)
+            except StopIteration:
+                break
+        self.stop()
+
+    def tick(self):
+        """
+        This generator is called in a loop from run_loop. It's important that
+        the method takes care of pausing or otherwise waiting for a period of
+        time. This split between run_loop() and tick() is to improve the
+        testability of the reloader implementations by decoupling the work they
+        do from the loop.
+        """
+        raise NotImplementedError('subclasses must implement tick().')
+
+    @classmethod
+    def check_availability(cls):
+        raise NotImplementedError('subclasses must implement check_availability().')
+
+    def notify_file_changed(self, path):
+        results = file_changed.send(sender=self, file_path=path)
+        logger.debug('%s notified as changed. Signal results: %s.', path, results)
+        if not any(res[1] for res in results):
+            trigger_reload(path)
+
+    # These are primarily used for testing.
+    @property
+    def should_stop(self):
+        return self._stop_condition.is_set()
+
+    def stop(self):
+        self._stop_condition.set()
+
+
+class StatReloader(BaseReloader):
+    SLEEP_TIME = 1  # Check for changes once per second.
+
+    def tick(self):
+        mtimes = {}
+        while True:
+            for filepath, mtime in self.snapshot_files():
+                old_time = mtimes.get(filepath)
+                mtimes[filepath] = mtime
+                if old_time is None:
+                    logger.debug('File %s first seen with mtime %s', filepath, mtime)
+                    continue
+                elif mtime > old_time:
+                    logger.debug('File %s previous mtime: %s, current mtime: %s', filepath, old_time, mtime)
+                    self.notify_file_changed(filepath)
+
+            time.sleep(self.SLEEP_TIME)
+            yield
+
+    def snapshot_files(self):
+        # watched_files may produce duplicate paths if globs overlap.
+        seen_files = set()
+        for file in self.watched_files():
+            if file in seen_files:
+                continue
+            try:
+                mtime = file.stat().st_mtime
+            except OSError:
+                # This is thrown when the file does not exist.
+                continue
+            seen_files.add(file)
+            yield file, mtime
+
+    @classmethod
+    def check_availability(cls):
+        return True
+
+
+class WatchmanUnavailable(RuntimeError):
+    pass
+
+
+class WatchmanReloader(BaseReloader):
+    def __init__(self):
+        self.roots = defaultdict(set)
+        self.processed_request = threading.Event()
+        self.client_timeout = int(os.environ.get('DJANGO_WATCHMAN_TIMEOUT', 5))
+        super().__init__()
+
+    @cached_property
+    def client(self):
+        return pywatchman.client(timeout=self.client_timeout)
+
+    def _watch_root(self, root):
+        # In practice this shouldn't occur, however, it's possible that a
+        # directory that doesn't exist yet is being watched. If it's outside of
+        # sys.path then this will end up a new root. How to handle this isn't
+        # clear: Not adding the root will likely break when subscribing to the
+        # changes, however, as this is currently an internal API,  no files
+        # will be being watched outside of sys.path. Fixing this by checking
+        # inside watch_glob() and watch_dir() is expensive, instead this could
+        # could fall back to the StatReloader if this case is detected? For
+        # now, watching its parent, if possible, is sufficient.
+        if not root.exists():
+            if not root.parent.exists():
+                logger.warning('Unable to watch root dir %s as neither it or its parent exist.', root)
+                return
+            root = root.parent
+        result = self.client.query('watch-project', str(root.absolute()))
+        if 'warning' in result:
+            logger.warning('Watchman warning: %s', result['warning'])
+        logger.debug('Watchman watch-project result: %s', result)
+        return result['watch'], result.get('relative_path')
+
+    @functools.lru_cache()
+    def _get_clock(self, root):
+        return self.client.query('clock', root)['clock']
+
+    def _subscribe(self, directory, name, expression):
+        root, rel_path = self._watch_root(directory)
+        # Only receive notifications of files changing, filtering out other types
+        # like special files: https://facebook.github.io/watchman/docs/type
+        only_files_expression = [
+            'allof',
+            ['anyof', ['type', 'f'], ['type', 'l']],
+            expression
+        ]
+        query = {
+            'expression': only_files_expression,
+            'fields': ['name'],
+            'since': self._get_clock(root),
+            'dedup_results': True,
+        }
+        if rel_path:
+            query['relative_root'] = rel_path
+        logger.debug('Issuing watchman subscription %s, for root %s. Query: %s', name, root, query)
+        self.client.query('subscribe', root, name, query)
+
+    def _subscribe_dir(self, directory, filenames):
+        if not directory.exists():
+            if not directory.parent.exists():
+                logger.warning('Unable to watch directory %s as neither it or its parent exist.', directory)
+                return
+            prefix = 'files-parent-%s' % directory.name
+            filenames = ['%s/%s' % (directory.name, filename) for filename in filenames]
+            directory = directory.parent
+            expression = ['name', filenames, 'wholename']
+        else:
+            prefix = 'files'
+            expression = ['name', filenames]
+        self._subscribe(directory, '%s:%s' % (prefix, directory), expression)
+
+    def _watch_glob(self, directory, patterns):
+        """
+        Watch a directory with a specific glob. If the directory doesn't yet
+        exist, attempt to watch the parent directory and amend the patterns to
+        include this. It's important this method isn't called more than one per
+        directory when updating all subscriptions. Subsequent calls will
+        overwrite the named subscription, so it must include all possible glob
+        expressions.
+        """
+        prefix = 'glob'
+        if not directory.exists():
+            if not directory.parent.exists():
+                logger.warning('Unable to watch directory %s as neither it or its parent exist.', directory)
+                return
+            prefix = 'glob-parent-%s' % directory.name
+            patterns = ['%s/%s' % (directory.name, pattern) for pattern in patterns]
+            directory = directory.parent
+
+        expression = ['anyof']
+        for pattern in patterns:
+            expression.append(['match', pattern, 'wholename'])
+        self._subscribe(directory, '%s:%s' % (prefix, directory), expression)
+
+    def watched_roots(self, watched_files):
+        extra_directories = self.directory_globs.keys()
+        watched_file_dirs = [f.parent for f in watched_files]
+        sys_paths = list(sys_path_directories())
+        return frozenset((*extra_directories, *watched_file_dirs, *sys_paths))
+
+    def _update_watches(self):
+        watched_files = list(self.watched_files(include_globs=False))
+        found_roots = common_roots(self.watched_roots(watched_files))
+        logger.debug('Watching %s files', len(watched_files))
+        logger.debug('Found common roots: %s', found_roots)
+        # Setup initial roots for performance, shortest roots first.
+        for root in sorted(found_roots):
+            self._watch_root(root)
+        for directory, patterns in self.directory_globs.items():
+            self._watch_glob(directory, patterns)
+        # Group sorted watched_files by their parent directory.
+        sorted_files = sorted(watched_files, key=lambda p: p.parent)

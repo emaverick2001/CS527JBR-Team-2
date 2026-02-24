@@ -1,0 +1,35 @@
+THOUGHT:
+
+
+ACTION:
+ls -la /testbed
+
+OBSERVATION:
+total 620
+drwxrwxrwx  1 root root   4096 Dec  7 03:53 .
+drwxr-xr-x  1 root root   4096 Dec  7 03:53 ..
+-rw-r--r--  1 root root    129 Sep 10 15:59 .codecov.yml
+-rw-r--r--  1 root root    416 Sep 10 15:59 .flake8
+drwxrwxrwx  1 root root   4096 Dec  7 03:53 .git
+-rw-r--r--  1 root root  10008 Sep 10 15:59 .git-blame-ignore-revs
+drwxrwxrwx  4 root root   4096 Sep 10 15:59 .github
+-rw-r--r--  1 root root    363 Sep 10 15:59 .gitignore
+-rw-r--r--  1 root root    205 Sep 10 15:59 .readthedocs.yml
+-rw-r--r--  1 root root   3818 Sep 10 15:59 AUTHORS
+-rw-r--r--  1 root root 377532 Sep 10 15:59 CHANGES
+-rw-r--r--  1 root root   3530 Sep 10 15:59 CODE_OF_CONDUCT
+-rw-r--r--  1 root root    591 Sep 10 15:59 CONTRIBUTING.rst
+-rw-r--r--  1 root root  26147 Sep 10 15:59 EXAMPLES
+-rw-r--r--  1 root root   3135 Sep 10 15:59 LICENSE
+-rw-r--r--  1 root root   1484 Sep 10 15:59 Makefile
+-rw-r--r--  1 root root   2323 Sep 10 15:59 README.rst
+-rw-r--r--  1 root root    767 Sep 10 15:59 bindep.txt
+drwxrwxrwx 11 root root   4096 Sep 10 15:59 doc
+-rw-r--r--  1 root root   1887 Sep 10 15:59 karma.conf.js
+-rw-r--r--  1 root root  94225 Sep 10 15:59 package-lock.json
+-rw-r--r--  1 root root    447 Sep 10 15:59 package.json
+-rw-r--r--  1 root root  12917 Sep 10 15:59 pyproject.toml
+drwxrwxrwx 19 root root   4096 Sep 10 15:59 sphinx
+drwxrwxrwx  5 root root   4096 Sep 10 15:59 tests
+-rw-r--r--  1 root root    986 Dec  7 03:53 tox.ini
+drwxrwxrwx  2 root root   4096 Sep 10 15:59 utils

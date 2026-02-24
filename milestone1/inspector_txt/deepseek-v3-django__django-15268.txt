@@ -1,0 +1,249 @@
+THOUGHT:
+
+
+ACTION:
+str_replace_editor view /testbed/django/db/migrations/autodetector.py --file_text '' --view_range 1 240 --old_str '' --new_str '' --insert_line 0
+
+OBSERVATION:
+Here's the result of running `cat -n` on /testbed/django/db/migrations/autodetector.py:
+     1	import functools
+     2	import re
+     3	from itertools import chain
+     4	
+     5	from django.conf import settings
+     6	from django.db import models
+     7	from django.db.migrations import operations
+     8	from django.db.migrations.migration import Migration
+     9	from django.db.migrations.operations.models import AlterModelOptions
+    10	from django.db.migrations.optimizer import MigrationOptimizer
+    11	from django.db.migrations.questioner import MigrationQuestioner
+    12	from django.db.migrations.utils import (
+    13	    COMPILED_REGEX_TYPE, RegexObject, resolve_relation,
+    14	)
+    15	from django.utils.topological_sort import stable_topological_sort
+    16	
+    17	
+    18	class MigrationAutodetector:
+    19	    """
+    20	    Take a pair of ProjectStates and compare them to see what the first would
+    21	    need doing to make it match the second (the second usually being the
+    22	    project's current state).
+    23	
+    24	    Note that this naturally operates on entire projects at a time,
+    25	    as it's likely that changes interact (for example, you can't
+    26	    add a ForeignKey without having a migration to add the table it
+    27	    depends on first). A user interface may offer single-app usage
+    28	    if it wishes, with the caveat that it may not always be possible.
+    29	    """
+    30	
+    31	    def __init__(self, from_state, to_state, questioner=None):
+    32	        self.from_state = from_state
+    33	        self.to_state = to_state
+    34	        self.questioner = questioner or MigrationQuestioner()
+    35	        self.existing_apps = {app for app, model in from_state.models}
+    36	
+    37	    def changes(self, graph, trim_to_apps=None, convert_apps=None, migration_name=None):
+    38	        """
+    39	        Main entry point to produce a list of applicable changes.
+    40	        Take a graph to base names on and an optional set of apps
+    41	        to try and restrict to (restriction is not guaranteed)
+    42	        """
+    43	        changes = self._detect_changes(convert_apps, graph)
+    44	        changes = self.arrange_for_graph(changes, graph, migration_name)
+    45	        if trim_to_apps:
+    46	            changes = self._trim_to_apps(changes, trim_to_apps)
+    47	        return changes
+    48	
+    49	    def deep_deconstruct(self, obj):
+    50	        """
+    51	        Recursive deconstruction for a field and its arguments.
+    52	        Used for full comparison for rename/alter; sometimes a single-level
+    53	        deconstruction will not compare correctly.
+    54	        """
+    55	        if isinstance(obj, list):
+    56	            return [self.deep_deconstruct(value) for value in obj]
+    57	        elif isinstance(obj, tuple):
+    58	            return tuple(self.deep_deconstruct(value) for value in obj)
+    59	        elif isinstance(obj, dict):
+    60	            return {
+    61	                key: self.deep_deconstruct(value)
+    62	                for key, value in obj.items()
+    63	            }
+    64	        elif isinstance(obj, functools.partial):
+    65	            return (obj.func, self.deep_deconstruct(obj.args), self.deep_deconstruct(obj.keywords))
+    66	        elif isinstance(obj, COMPILED_REGEX_TYPE):
+    67	            return RegexObject(obj)
+    68	        elif isinstance(obj, type):
+    69	            # If this is a type that implements 'deconstruct' as an instance method,
+    70	            # avoid treating this as being deconstructible itself - see #22951
+    71	            return obj
+    72	        elif hasattr(obj, 'deconstruct'):
+    73	            deconstructed = obj.deconstruct()
+    74	            if isinstance(obj, models.Field):
+    75	                # we have a field which also returns a name
+    76	                deconstructed = deconstructed[1:]
+    77	            path, args, kwargs = deconstructed
+    78	            return (
+    79	                path,
+    80	                [self.deep_deconstruct(value) for value in args],
+    81	                {
+    82	                    key: self.deep_deconstruct(value)
+    83	                    for key, value in kwargs.items()
+    84	                },
+    85	            )
+    86	        else:
+    87	            return obj
+    88	
+    89	    def only_relation_agnostic_fields(self, fields):
+    90	        """
+    91	        Return a definition of the fields that ignores field names and
+    92	        what related fields actually relate to. Used for detecting renames (as
+    93	        the related fields change during renames).
+    94	        """
+    95	        fields_def = []
+    96	        for name, field in sorted(fields.items()):
+    97	            deconstruction = self.deep_deconstruct(field)
+    98	            if field.remote_field and field.remote_field.model:
+    99	                deconstruction[2].pop('to', None)
+   100	            fields_def.append(deconstruction)
+   101	        return fields_def
+   102	
+   103	    def _detect_changes(self, convert_apps=None, graph=None):
+   104	        """
+   105	        Return a dict of migration plans which will achieve the
+   106	        change from from_state to to_state. The dict has app labels
+   107	        as keys and a list of migrations as values.
+   108	
+   109	        The resulting migrations aren't specially named, but the names
+   110	        do matter for dependencies inside the set.
+   111	
+   112	        convert_apps is the list of apps to convert to use migrations
+   113	        (i.e. to make initial migrations for, in the usual case)
+   114	
+   115	        graph is an optional argument that, if provided, can help improve
+   116	        dependency generation and avoid potential circular dependencies.
+   117	        """
+   118	        # The first phase is generating all the operations for each app
+   119	        # and gathering them into a big per-app list.
+   120	        # Then go through that list, order it, and split into migrations to
+   121	        # resolve dependencies caused by M2Ms and FKs.
+   122	        self.generated_operations = {}
+   123	        self.altered_indexes = {}
+   124	        self.altered_constraints = {}
+   125	
+   126	        # Prepare some old/new state and model lists, separating
+   127	        # proxy models and ignoring unmigrated apps.
+   128	        self.old_model_keys = set()
+   129	        self.old_proxy_keys = set()
+   130	        self.old_unmanaged_keys = set()
+   131	        self.new_model_keys = set()
+   132	        self.new_proxy_keys = set()
+   133	        self.new_unmanaged_keys = set()
+   134	        for (app_label, model_name), model_state in self.from_state.models.items():
+   135	            if not model_state.options.get('managed', True):
+   136	                self.old_unmanaged_keys.add((app_label, model_name))
+   137	            elif app_label not in self.from_state.real_apps:
+   138	                if model_state.options.get('proxy'):
+   139	                    self.old_proxy_keys.add((app_label, model_name))
+   140	                else:
+   141	                    self.old_model_keys.add((app_label, model_name))
+   142	
+   143	        for (app_label, model_name), model_state in self.to_state.models.items():
+   144	            if not model_state.options.get('managed', True):
+   145	                self.new_unmanaged_keys.add((app_label, model_name))
+   146	            elif (
+   147	                app_label not in self.from_state.real_apps or
+   148	                (convert_apps and app_label in convert_apps)
+   149	            ):
+   150	                if model_state.options.get('proxy'):
+   151	                    self.new_proxy_keys.add((app_label, model_name))
+   152	                else:
+   153	                    self.new_model_keys.add((app_label, model_name))
+   154	
+   155	        self.from_state.resolve_fields_and_relations()
+   156	        self.to_state.resolve_fields_and_relations()
+   157	
+   158	        # Renames have to come first
+   159	        self.generate_renamed_models()
+   160	
+   161	        # Prepare lists of fields and generate through model map
+   162	        self._prepare_field_lists()
+   163	        self._generate_through_model_map()
+   164	
+   165	        # Generate non-rename model operations
+   166	        self.generate_deleted_models()
+   167	        self.generate_created_models()
+   168	        self.generate_deleted_proxies()
+   169	        self.generate_created_proxies()
+   170	        self.generate_altered_options()
+   171	        self.generate_altered_managers()
+   172	
+   173	        # Create the altered indexes and store them in self.altered_indexes.
+   174	        # This avoids the same computation in generate_removed_indexes()
+   175	        # and generate_added_indexes().
+   176	        self.create_altered_indexes()
+   177	        self.create_altered_constraints()
+   178	        # Generate index removal operations before field is removed
+   179	        self.generate_removed_constraints()
+   180	        self.generate_removed_indexes()
+   181	        # Generate field renaming operations.
+   182	        self.generate_renamed_fields()
+   183	        # Generate removal of foo together.
+   184	        self.generate_removed_altered_unique_together()
+   185	        self.generate_removed_altered_index_together()
+   186	        # Generate field operations.
+   187	        self.generate_removed_fields()
+   188	        self.generate_added_fields()
+   189	        self.generate_altered_fields()
+   190	        self.generate_altered_order_with_respect_to()
+   191	        self.generate_altered_unique_together()
+   192	        self.generate_altered_index_together()
+   193	        self.generate_added_indexes()
+   194	        self.generate_added_constraints()
+   195	        self.generate_altered_db_table()
+   196	
+   197	        self._sort_migrations()
+   198	        self._build_migration_list(graph)
+   199	        self._optimize_migrations()
+   200	
+   201	        return self.migrations
+   202	
+   203	    def _prepare_field_lists(self):
+   204	        """
+   205	        Prepare field lists and a list of the fields that used through models
+   206	        in the old state so dependencies can be made from the through model
+   207	        deletion to the field that uses it.
+   208	        """
+   209	        self.kept_model_keys = self.old_model_keys & self.new_model_keys
+   210	        self.kept_proxy_keys = self.old_proxy_keys & self.new_proxy_keys
+   211	        self.kept_unmanaged_keys = self.old_unmanaged_keys & self.new_unmanaged_keys
+   212	        self.through_users = {}
+   213	        self.old_field_keys = {
+   214	            (app_label, model_name, field_name)
+   215	            for app_label, model_name in self.kept_model_keys
+   216	            for field_name in self.from_state.models[
+   217	                app_label,
+   218	                self.renamed_models.get((app_label, model_name), model_name)
+   219	            ].fields
+   220	        }
+   221	        self.new_field_keys = {
+   222	            (app_label, model_name, field_name)
+   223	            for app_label, model_name in self.kept_model_keys
+   224	            for field_name in self.to_state.models[app_label, model_name].fields
+   225	        }
+   226	
+   227	    def _generate_through_model_map(self):
+   228	        """Through model map generation."""
+   229	        for app_label, model_name in sorted(self.old_model_keys):
+   230	            old_model_name = self.renamed_models.get((app_label, model_name), model_name)
+   231	            old_model_state = self.from_state.models[app_label, old_model_name]
+   232	            for field_name, field in old_model_state.fields.items():
+   233	                if hasattr(field, 'remote_field') and getattr(field.remote_field, 'through', None):
+   234	                    through_key = resolve_relation(field.remote_field.through, app_label, model_name)
+   235	                    self.through_users[through_key] = (app_label, old_model_name, field_name)
+   236	
+   237	    @staticmethod
+   238	    def _resolve_dependency(dependency):
+   239	        """
+   240	        Return the resolved dependency and a boolean denoting whether or not
+

@@ -1,0 +1,11 @@
+THOUGHT:
+
+
+ACTION:
+grep -R "class JSONField" -n django | sed -n '1,200p'
+
+OBSERVATION:
+django/db/models/fields/json.py:16:class JSONField(CheckFieldDefaultMixin, Field):
+django/contrib/postgres/fields/jsonb.py:13:class JSONField(BuiltinJSONField):
+django/contrib/postgres/forms/jsonb.py:9:class JSONField(BuiltinJSONField):
+django/forms/fields.py:1226:class JSONField(CharField):

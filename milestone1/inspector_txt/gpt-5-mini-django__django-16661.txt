@@ -1,0 +1,410 @@
+THOUGHT:
+
+
+ACTION:
+str_replace_editor view /testbed/django/contrib/admin/options.py --file_text '' --view_range 400 800 --old_str '    def lookup_allowed(self, lookup, value):' --new_str '' --insert_line 0
+
+OBSERVATION:
+Here's the result of running `cat -n` on /testbed/django/contrib/admin/options.py:
+   400	
+   401	    def get_ordering(self, request):
+   402	        """
+   403	        Hook for specifying field ordering.
+   404	        """
+   405	        return self.ordering or ()  # otherwise we might try to *None, which is bad ;)
+   406	
+   407	    def get_readonly_fields(self, request, obj=None):
+   408	        """
+   409	        Hook for specifying custom readonly fields.
+   410	        """
+   411	        return self.readonly_fields
+   412	
+   413	    def get_prepopulated_fields(self, request, obj=None):
+   414	        """
+   415	        Hook for specifying custom prepopulated fields.
+   416	        """
+   417	        return self.prepopulated_fields
+   418	
+   419	    def get_queryset(self, request):
+   420	        """
+   421	        Return a QuerySet of all model instances that can be edited by the
+   422	        admin site. This is used by changelist_view.
+   423	        """
+   424	        qs = self.model._default_manager.get_queryset()
+   425	        # TODO: this should be handled by some parameter to the ChangeList.
+   426	        ordering = self.get_ordering(request)
+   427	        if ordering:
+   428	            qs = qs.order_by(*ordering)
+   429	        return qs
+   430	
+   431	    def get_sortable_by(self, request):
+   432	        """Hook for specifying which fields can be sorted in the changelist."""
+   433	        return (
+   434	            self.sortable_by
+   435	            if self.sortable_by is not None
+   436	            else self.get_list_display(request)
+   437	        )
+   438	
+   439	    def lookup_allowed(self, lookup, value):
+   440	        from django.contrib.admin.filters import SimpleListFilter
+   441	
+   442	        model = self.model
+   443	        # Check FKey lookups that are allowed, so that popups produced by
+   444	        # ForeignKeyRawIdWidget, on the basis of ForeignKey.limit_choices_to,
+   445	        # are allowed to work.
+   446	        for fk_lookup in model._meta.related_fkey_lookups:
+   447	            # As ``limit_choices_to`` can be a callable, invoke it here.
+   448	            if callable(fk_lookup):
+   449	                fk_lookup = fk_lookup()
+   450	            if (lookup, value) in widgets.url_params_from_lookup_dict(
+   451	                fk_lookup
+   452	            ).items():
+   453	                return True
+   454	
+   455	        relation_parts = []
+   456	        prev_field = None
+   457	        for part in lookup.split(LOOKUP_SEP):
+   458	            try:
+   459	                field = model._meta.get_field(part)
+   460	            except FieldDoesNotExist:
+   461	                # Lookups on nonexistent fields are ok, since they're ignored
+   462	                # later.
+   463	                break
+   464	            # It is allowed to filter on values that would be found from local
+   465	            # model anyways. For example, if you filter on employee__department__id,
+   466	            # then the id value would be found already from employee__department_id.
+   467	            if not prev_field or (
+   468	                prev_field.is_relation
+   469	                and field not in prev_field.path_infos[-1].target_fields
+   470	            ):
+   471	                relation_parts.append(part)
+   472	            if not getattr(field, "path_infos", None):
+   473	                # This is not a relational field, so further parts
+   474	                # must be transforms.
+   475	                break
+   476	            prev_field = field
+   477	            model = field.path_infos[-1].to_opts.model
+   478	
+   479	        if len(relation_parts) <= 1:
+   480	            # Either a local field filter, or no fields at all.
+   481	            return True
+   482	        valid_lookups = {self.date_hierarchy}
+   483	        for filter_item in self.list_filter:
+   484	            if isinstance(filter_item, type) and issubclass(
+   485	                filter_item, SimpleListFilter
+   486	            ):
+   487	                valid_lookups.add(filter_item.parameter_name)
+   488	            elif isinstance(filter_item, (list, tuple)):
+   489	                valid_lookups.add(filter_item[0])
+   490	            else:
+   491	                valid_lookups.add(filter_item)
+   492	
+   493	        # Is it a valid relational lookup?
+   494	        return not {
+   495	            LOOKUP_SEP.join(relation_parts),
+   496	            LOOKUP_SEP.join(relation_parts + [part]),
+   497	        }.isdisjoint(valid_lookups)
+   498	
+   499	    def to_field_allowed(self, request, to_field):
+   500	        """
+   501	        Return True if the model associated with this admin should be
+   502	        allowed to be referenced by the specified field.
+   503	        """
+   504	        try:
+   505	            field = self.opts.get_field(to_field)
+   506	        except FieldDoesNotExist:
+   507	            return False
+   508	
+   509	        # Always allow referencing the primary key since it's already possible
+   510	        # to get this information from the change view URL.
+   511	        if field.primary_key:
+   512	            return True
+   513	
+   514	        # Allow reverse relationships to models defining m2m fields if they
+   515	        # target the specified field.
+   516	        for many_to_many in self.opts.many_to_many:
+   517	            if many_to_many.m2m_target_field_name() == to_field:
+   518	                return True
+   519	
+   520	        # Make sure at least one of the models registered for this site
+   521	        # references this field through a FK or a M2M relationship.
+   522	        registered_models = set()
+   523	        for model, admin in self.admin_site._registry.items():
+   524	            registered_models.add(model)
+   525	            for inline in admin.inlines:
+   526	                registered_models.add(inline.model)
+   527	
+   528	        related_objects = (
+   529	            f
+   530	            for f in self.opts.get_fields(include_hidden=True)
+   531	            if (f.auto_created and not f.concrete)
+   532	        )
+   533	        for related_object in related_objects:
+   534	            related_model = related_object.related_model
+   535	            remote_field = related_object.field.remote_field
+   536	            if (
+   537	                any(issubclass(model, related_model) for model in registered_models)
+   538	                and hasattr(remote_field, "get_related_field")
+   539	                and remote_field.get_related_field() == field
+   540	            ):
+   541	                return True
+   542	
+   543	        return False
+   544	
+   545	    def has_add_permission(self, request):
+   546	        """
+   547	        Return True if the given request has permission to add an object.
+   548	        Can be overridden by the user in subclasses.
+   549	        """
+   550	        opts = self.opts
+   551	        codename = get_permission_codename("add", opts)
+   552	        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+   553	
+   554	    def has_change_permission(self, request, obj=None):
+   555	        """
+   556	        Return True if the given request has permission to change the given
+   557	        Django model instance, the default implementation doesn't examine the
+   558	        `obj` parameter.
+   559	
+   560	        Can be overridden by the user in subclasses. In such case it should
+   561	        return True if the given request has permission to change the `obj`
+   562	        model instance. If `obj` is None, this should return True if the given
+   563	        request has permission to change *any* object of the given type.
+   564	        """
+   565	        opts = self.opts
+   566	        codename = get_permission_codename("change", opts)
+   567	        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+   568	
+   569	    def has_delete_permission(self, request, obj=None):
+   570	        """
+   571	        Return True if the given request has permission to delete the given
+   572	        Django model instance, the default implementation doesn't examine the
+   573	        `obj` parameter.
+   574	
+   575	        Can be overridden by the user in subclasses. In such case it should
+   576	        return True if the given request has permission to delete the `obj`
+   577	        model instance. If `obj` is None, this should return True if the given
+   578	        request has permission to delete *any* object of the given type.
+   579	        """
+   580	        opts = self.opts
+   581	        codename = get_permission_codename("delete", opts)
+   582	        return request.user.has_perm("%s.%s" % (opts.app_label, codename))
+   583	
+   584	    def has_view_permission(self, request, obj=None):
+   585	        """
+   586	        Return True if the given request has permission to view the given
+   587	        Django model instance. The default implementation doesn't examine the
+   588	        `obj` parameter.
+   589	
+   590	        If overridden by the user in subclasses, it should return True if the
+   591	        given request has permission to view the `obj` model instance. If `obj`
+   592	        is None, it should return True if the request has permission to view
+   593	        any object of the given type.
+   594	        """
+   595	        opts = self.opts
+   596	        codename_view = get_permission_codename("view", opts)
+   597	        codename_change = get_permission_codename("change", opts)
+   598	        return request.user.has_perm(
+   599	            "%s.%s" % (opts.app_label, codename_view)
+   600	        ) or request.user.has_perm("%s.%s" % (opts.app_label, codename_change))
+   601	
+   602	    def has_view_or_change_permission(self, request, obj=None):
+   603	        return self.has_view_permission(request, obj) or self.has_change_permission(
+   604	            request, obj
+   605	        )
+   606	
+   607	    def has_module_permission(self, request):
+   608	        """
+   609	        Return True if the given request has any permission in the given
+   610	        app label.
+   611	
+   612	        Can be overridden by the user in subclasses. In such case it should
+   613	        return True if the given request has permission to view the module on
+   614	        the admin index page and access the module's index page. Overriding it
+   615	        does not restrict access to the add, change or delete views. Use
+   616	        `ModelAdmin.has_(add|change|delete)_permission` for that.
+   617	        """
+   618	        return request.user.has_module_perms(self.opts.app_label)
+   619	
+   620	
+   621	class ModelAdmin(BaseModelAdmin):
+   622	    """Encapsulate all admin options and functionality for a given model."""
+   623	
+   624	    list_display = ("__str__",)
+   625	    list_display_links = ()
+   626	    list_filter = ()
+   627	    list_select_related = False
+   628	    list_per_page = 100
+   629	    list_max_show_all = 200
+   630	    list_editable = ()
+   631	    search_fields = ()
+   632	    search_help_text = None
+   633	    date_hierarchy = None
+   634	    save_as = False
+   635	    save_as_continue = True
+   636	    save_on_top = False
+   637	    paginator = Paginator
+   638	    preserve_filters = True
+   639	    show_facets = ShowFacets.ALLOW
+   640	    inlines = ()
+   641	
+   642	    # Custom templates (designed to be over-ridden in subclasses)
+   643	    add_form_template = None
+   644	    change_form_template = None
+   645	    change_list_template = None
+   646	    delete_confirmation_template = None
+   647	    delete_selected_confirmation_template = None
+   648	    object_history_template = None
+   649	    popup_response_template = None
+   650	
+   651	    # Actions
+   652	    actions = ()
+   653	    action_form = helpers.ActionForm
+   654	    actions_on_top = True
+   655	    actions_on_bottom = False
+   656	    actions_selection_counter = True
+   657	    checks_class = ModelAdminChecks
+   658	
+   659	    def __init__(self, model, admin_site):
+   660	        self.model = model
+   661	        self.opts = model._meta
+   662	        self.admin_site = admin_site
+   663	        super().__init__()
+   664	
+   665	    def __str__(self):
+   666	        return "%s.%s" % (self.opts.app_label, self.__class__.__name__)
+   667	
+   668	    def __repr__(self):
+   669	        return (
+   670	            f"<{self.__class__.__qualname__}: model={self.model.__qualname__} "
+   671	            f"site={self.admin_site!r}>"
+   672	        )
+   673	
+   674	    def get_inline_instances(self, request, obj=None):
+   675	        inline_instances = []
+   676	        for inline_class in self.get_inlines(request, obj):
+   677	            inline = inline_class(self.model, self.admin_site)
+   678	            if request:
+   679	                if not (
+   680	                    inline.has_view_or_change_permission(request, obj)
+   681	                    or inline.has_add_permission(request, obj)
+   682	                    or inline.has_delete_permission(request, obj)
+   683	                ):
+   684	                    continue
+   685	                if not inline.has_add_permission(request, obj):
+   686	                    inline.max_num = 0
+   687	            inline_instances.append(inline)
+   688	
+   689	        return inline_instances
+   690	
+   691	    def get_urls(self):
+   692	        from django.urls import path
+   693	
+   694	        def wrap(view):
+   695	            def wrapper(*args, **kwargs):
+   696	                return self.admin_site.admin_view(view)(*args, **kwargs)
+   697	
+   698	            wrapper.model_admin = self
+   699	            return update_wrapper(wrapper, view)
+   700	
+   701	        info = self.opts.app_label, self.opts.model_name
+   702	
+   703	        return [
+   704	            path("", wrap(self.changelist_view), name="%s_%s_changelist" % info),
+   705	            path("add/", wrap(self.add_view), name="%s_%s_add" % info),
+   706	            path(
+   707	                "<path:object_id>/history/",
+   708	                wrap(self.history_view),
+   709	                name="%s_%s_history" % info,
+   710	            ),
+   711	            path(
+   712	                "<path:object_id>/delete/",
+   713	                wrap(self.delete_view),
+   714	                name="%s_%s_delete" % info,
+   715	            ),
+   716	            path(
+   717	                "<path:object_id>/change/",
+   718	                wrap(self.change_view),
+   719	                name="%s_%s_change" % info,
+   720	            ),
+   721	            # For backwards compatibility (was the change url before 1.9)
+   722	            path(
+   723	                "<path:object_id>/",
+   724	                wrap(
+   725	                    RedirectView.as_view(
+   726	                        pattern_name="%s:%s_%s_change"
+   727	                        % ((self.admin_site.name,) + info)
+   728	                    )
+   729	                ),
+   730	            ),
+   731	        ]
+   732	
+   733	    @property
+   734	    def urls(self):
+   735	        return self.get_urls()
+   736	
+   737	    @property
+   738	    def media(self):
+   739	        extra = "" if settings.DEBUG else ".min"
+   740	        js = [
+   741	            "vendor/jquery/jquery%s.js" % extra,
+   742	            "jquery.init.js",
+   743	            "core.js",
+   744	            "admin/RelatedObjectLookups.js",
+   745	            "actions.js",
+   746	            "urlify.js",
+   747	            "prepopulate.js",
+   748	            "vendor/xregexp/xregexp%s.js" % extra,
+   749	        ]
+   750	        return forms.Media(js=["admin/js/%s" % url for url in js])
+   751	
+   752	    def get_model_perms(self, request):
+   753	        """
+   754	        Return a dict of all perms for this model. This dict has the keys
+   755	        ``add``, ``change``, ``delete``, and ``view`` mapping to the True/False
+   756	        for each of those actions.
+   757	        """
+   758	        return {
+   759	            "add": self.has_add_permission(request),
+   760	            "change": self.has_change_permission(request),
+   761	            "delete": self.has_delete_permission(request),
+   762	            "view": self.has_view_permission(request),
+   763	        }
+   764	
+   765	    def _get_form_for_get_fields(self, request, obj):
+   766	        return self.get_form(request, obj, fields=None)
+   767	
+   768	    def get_form(self, request, obj=None, change=False, **kwargs):
+   769	        """
+   770	        Return a Form class for use in the admin add view. This is used by
+   771	        add_view and change_view.
+   772	        """
+   773	        if "fields" in kwargs:
+   774	            fields = kwargs.pop("fields")
+   775	        else:
+   776	            fields = flatten_fieldsets(self.get_fieldsets(request, obj))
+   777	        excluded = self.get_exclude(request, obj)
+   778	        exclude = [] if excluded is None else list(excluded)
+   779	        readonly_fields = self.get_readonly_fields(request, obj)
+   780	        exclude.extend(readonly_fields)
+   781	        # Exclude all fields if it's a change form and the user doesn't have
+   782	        # the change permission.
+   783	        if (
+   784	            change
+   785	            and hasattr(request, "user")
+   786	            and not self.has_change_permission(request, obj)
+   787	        ):
+   788	            exclude.extend(fields)
+   789	        if excluded is None and hasattr(self.form, "_meta") and self.form._meta.exclude:
+   790	            # Take the custom ModelForm's Meta.exclude into account only if the
+   791	            # ModelAdmin doesn't define its own.
+   792	            exclude.extend(self.form._meta.exclude)
+   793	        # if exclude is an empty list we pass None to be consistent with the
+   794	        # default on modelform_factory
+   795	        exclude = exclude or None
+   796	
+   797	        # Remove declared form fields which are in readonly_fields.
+   798	        new_attrs = dict.fromkeys(
+   799	            f for f in readonly_fields if f in self.form.declared_fields
+   800	        )
+

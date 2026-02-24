@@ -1,0 +1,38 @@
+THOUGHT:
+
+
+ACTION:
+ls -la /testbed
+
+OBSERVATION:
+total 184
+drwxrwxrwx   1 root root  4096 Sep 10 09:53 .
+drwxr-xr-x   1 root root  4096 Dec  6 06:13 ..
+-rw-r--r--   1 root root   782 Sep 10 09:46 .editorconfig
+-rw-r--r--   1 root root    86 Sep 10 09:46 .eslintignore
+-rw-r--r--   1 root root  1165 Sep 10 09:46 .eslintrc
+drwxrwxrwx   1 root root  4096 Dec  6 06:13 .git
+-rw-r--r--   1 root root   297 Sep 10 09:46 .gitattributes
+-rw-r--r--   1 root root   353 Sep 10 09:46 .gitignore
+-rw-r--r--   1 root root   164 Sep 10 09:46 .hgignore
+drwxrwxrwx   2 root root  4096 Sep 10 09:46 .tx
+-rw-r--r--   1 root root 36585 Sep 10 09:46 AUTHORS
+-rw-r--r--   1 root root  1115 Sep 10 09:46 CONTRIBUTING.rst
+drwxr-xr-x   2 root root  4096 Sep 10 09:53 Django.egg-info
+-rw-r--r--   1 root root    51 Sep 10 09:46 FUNDING.yml
+-rw-r--r--   1 root root   353 Sep 10 09:46 Gruntfile.js
+-rw-r--r--   1 root root   311 Sep 10 09:46 INSTALL
+-rw-r--r--   1 root root  1552 Sep 10 09:46 LICENSE
+-rw-r--r--   1 root root 13231 Sep 10 09:46 LICENSE.python
+-rw-r--r--   1 root root   307 Sep 10 09:46 MANIFEST.in
+-rw-r--r--   1 root root  1900 Sep 10 09:46 README.rst
+drwxrwxrwx  19 root root  4096 Sep 10 09:53 django
+drwxrwxrwx  13 root root  4096 Sep 10 09:46 docs
+drwxrwxrwx   2 root root  4096 Sep 10 09:46 extras
+drwxrwxrwx   5 root root  4096 Sep 10 09:46 js_tests
+-rw-r--r--   1 root root   347 Sep 10 09:46 package.json
+drwxrwxrwx   2 root root  4096 Sep 10 09:46 scripts
+-rw-r--r--   1 root root   390 Sep 10 09:46 setup.cfg
+-rw-r--r--   1 root root  4700 Sep 10 09:46 setup.py
+drwxrwxrwx 212 root root 12288 Sep 10 09:46 tests
+-rw-r--r--   1 root root  1532 Sep 10 09:46 tox.ini

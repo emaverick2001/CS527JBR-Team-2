@@ -1,0 +1,39 @@
+THOUGHT:
+
+
+ACTION:
+ls -la
+
+OBSERVATION:
+total 532
+drwxrwxrwx  1 root root   4096 Dec  7 06:08 .
+drwxr-xr-x  1 root root   4096 Dec  7 06:08 ..
+drwxr-xr-x  2 root root   4096 Sep 10 16:09 .circleci
+-rw-r--r--  1 root root    129 Sep 10 16:09 .codecov.yml
+drwxrwxrwx  1 root root   4096 Dec  7 06:08 .git
+drwxrwxrwx  4 root root   4096 Sep 10 16:09 .github
+-rw-r--r--  1 root root    340 Sep 10 16:09 .gitignore
+-rw-r--r--  1 root root    135 Sep 10 16:09 .readthedocs.yml
+-rw-r--r--  1 root root   4057 Sep 10 16:09 AUTHORS
+-rw-r--r--  1 root root 279917 Sep 10 16:09 CHANGES
+-rw-r--r--  1 root root  42125 Sep 10 16:09 CHANGES.old
+-rw-r--r--  1 root root   3530 Sep 10 16:09 CODE_OF_CONDUCT
+-rw-r--r--  1 root root    591 Sep 10 16:09 CONTRIBUTING.rst
+-rw-r--r--  1 root root  24754 Sep 10 16:09 EXAMPLES
+-rw-r--r--  1 root root   8998 Sep 10 16:09 LICENSE
+-rw-r--r--  1 root root    842 Sep 10 16:09 MANIFEST.in
+-rw-r--r--  1 root root   1760 Sep 10 16:09 Makefile
+-rw-r--r--  1 root root   4396 Sep 10 16:09 README.rst
+drwxr-xr-x  2 root root   4096 Sep 10 16:11 Sphinx.egg-info
+-rw-r--r--  1 root root    874 Sep 10 16:09 babel.cfg
+-rw-r--r--  1 root root    704 Sep 10 16:09 bindep.txt
+drwxrwxrwx 10 root root   4096 Sep 10 16:09 doc
+-rw-r--r--  1 root root   1894 Sep 10 16:09 karma.conf.js
+-rw-r--r--  1 root root  45178 Sep 10 16:09 package-lock.json
+-rw-r--r--  1 root root    485 Sep 10 16:09 package.json
+-rw-r--r--  1 root root   1717 Sep 10 16:09 setup.cfg
+-rw-r--r--  1 root root   8433 Dec  7 06:08 setup.py
+drwxrwxrwx 20 root root   4096 Sep 10 16:11 sphinx
+drwxrwxrwx  5 root root   4096 Sep 10 16:09 tests
+-rw-r--r--  1 root root   2125 Dec  7 06:08 tox.ini
+drwxrwxrwx  2 root root   4096 Sep 10 16:09 utils

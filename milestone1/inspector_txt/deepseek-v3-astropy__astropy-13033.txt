@@ -1,0 +1,8 @@
+THOUGHT:
+
+
+ACTION:
+grep -nR "class TimeSeries" -n /testbed | sed -n '1,200p'
+
+OBSERVATION:
+/testbed/astropy/timeseries/sampled.py:18:class TimeSeries(BaseTimeSeries):

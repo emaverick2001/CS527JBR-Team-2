@@ -1,0 +1,25 @@
+THOUGHT:
+
+
+ACTION:
+grep -R "connection.timezone" -n /testbed | sed -n '1,200p'
+
+OBSERVATION:
+/testbed/django/db/backends/mysql/operations.py:196:                value = timezone.make_naive(value, self.connection.timezone)
+/testbed/django/db/backends/mysql/operations.py:254:            value = timezone.make_aware(value, self.connection.timezone)
+/testbed/django/db/backends/oracle/operations.py:200:            value = timezone.make_aware(value, self.connection.timezone)
+/testbed/django/db/backends/oracle/operations.py:500:                value = timezone.make_naive(value, self.connection.timezone)
+/testbed/django/db/backends/sqlite3/operations.py:219:                value = timezone.make_naive(value, self.connection.timezone)
+/testbed/django/db/backends/sqlite3/operations.py:261:                value = timezone.make_aware(value, self.connection.timezone)
+/testbed/tests/timezones/tests.py:543:    def override_database_connection_timezone(self, timezone):
+/testbed/tests/timezones/tests.py:548:            connection.timezone
+/testbed/tests/timezones/tests.py:549:            del connection.timezone
+/testbed/tests/timezones/tests.py:550:            connection.timezone_name
+/testbed/tests/timezones/tests.py:551:            del connection.timezone_name
+/testbed/tests/timezones/tests.py:558:            connection.timezone
+/testbed/tests/timezones/tests.py:559:            del connection.timezone
+/testbed/tests/timezones/tests.py:560:            connection.timezone_name
+/testbed/tests/timezones/tests.py:561:            del connection.timezone_name
+/testbed/tests/timezones/tests.py:567:        with self.override_database_connection_timezone('Asia/Bangkok'):
+/testbed/tests/timezones/tests.py:574:        with self.override_database_connection_timezone('Asia/Bangkok'):
+/testbed/tests/backends/postgresql/tests.py:77:            del new_connection.timezone_name

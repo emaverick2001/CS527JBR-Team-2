@@ -1,0 +1,392 @@
+THOUGHT:
+
+
+ACTION:
+str_replace_editor view /testbed/django/db/models/fields/related.py --file_text '' --view_range 1 400 --old_str '' --new_str '' --insert_line 0
+
+OBSERVATION:
+Here's the result of running `cat -n` on /testbed/django/db/models/fields/related.py:
+     1	import functools
+     2	import inspect
+     3	from functools import partial
+     4	
+     5	from django import forms
+     6	from django.apps import apps
+     7	from django.conf import SettingsReference, settings
+     8	from django.core import checks, exceptions
+     9	from django.db import connection, router
+    10	from django.db.backends import utils
+    11	from django.db.models import Q
+    12	from django.db.models.constants import LOOKUP_SEP
+    13	from django.db.models.deletion import CASCADE, SET_DEFAULT, SET_NULL
+    14	from django.db.models.query_utils import PathInfo
+    15	from django.db.models.utils import make_model_tuple
+    16	from django.utils.functional import cached_property
+    17	from django.utils.translation import gettext_lazy as _
+    18	
+    19	from . import Field
+    20	from .mixins import FieldCacheMixin
+    21	from .related_descriptors import (
+    22	    ForeignKeyDeferredAttribute, ForwardManyToOneDescriptor,
+    23	    ForwardOneToOneDescriptor, ManyToManyDescriptor,
+    24	    ReverseManyToOneDescriptor, ReverseOneToOneDescriptor,
+    25	)
+    26	from .related_lookups import (
+    27	    RelatedExact, RelatedGreaterThan, RelatedGreaterThanOrEqual, RelatedIn,
+    28	    RelatedIsNull, RelatedLessThan, RelatedLessThanOrEqual,
+    29	)
+    30	from .reverse_related import (
+    31	    ForeignObjectRel, ManyToManyRel, ManyToOneRel, OneToOneRel,
+    32	)
+    33	
+    34	RECURSIVE_RELATIONSHIP_CONSTANT = 'self'
+    35	
+    36	
+    37	def resolve_relation(scope_model, relation):
+    38	    """
+    39	    Transform relation into a model or fully-qualified model string of the form
+    40	    "app_label.ModelName", relative to scope_model.
+    41	
+    42	    The relation argument can be:
+    43	      * RECURSIVE_RELATIONSHIP_CONSTANT, i.e. the string "self", in which case
+    44	        the model argument will be returned.
+    45	      * A bare model name without an app_label, in which case scope_model's
+    46	        app_label will be prepended.
+    47	      * An "app_label.ModelName" string.
+    48	      * A model class, which will be returned unchanged.
+    49	    """
+    50	    # Check for recursive relations
+    51	    if relation == RECURSIVE_RELATIONSHIP_CONSTANT:
+    52	        relation = scope_model
+    53	
+    54	    # Look for an "app.Model" relation
+    55	    if isinstance(relation, str):
+    56	        if "." not in relation:
+    57	            relation = "%s.%s" % (scope_model._meta.app_label, relation)
+    58	
+    59	    return relation
+    60	
+    61	
+    62	def lazy_related_operation(function, model, *related_models, **kwargs):
+    63	    """
+    64	    Schedule `function` to be called once `model` and all `related_models`
+    65	    have been imported and registered with the app registry. `function` will
+    66	    be called with the newly-loaded model classes as its positional arguments,
+    67	    plus any optional keyword arguments.
+    68	
+    69	    The `model` argument must be a model class. Each subsequent positional
+    70	    argument is another model, or a reference to another model - see
+    71	    `resolve_relation()` for the various forms these may take. Any relative
+    72	    references will be resolved relative to `model`.
+    73	
+    74	    This is a convenience wrapper for `Apps.lazy_model_operation` - the app
+    75	    registry model used is the one found in `model._meta.apps`.
+    76	    """
+    77	    models = [model] + [resolve_relation(model, rel) for rel in related_models]
+    78	    model_keys = (make_model_tuple(m) for m in models)
+    79	    apps = model._meta.apps
+    80	    return apps.lazy_model_operation(partial(function, **kwargs), *model_keys)
+    81	
+    82	
+    83	class RelatedField(FieldCacheMixin, Field):
+    84	    """Base class that all relational fields inherit from."""
+    85	
+    86	    # Field flags
+    87	    one_to_many = False
+    88	    one_to_one = False
+    89	    many_to_many = False
+    90	    many_to_one = False
+    91	
+    92	    @cached_property
+    93	    def related_model(self):
+    94	        # Can't cache this property until all the models are loaded.
+    95	        apps.check_models_ready()
+    96	        return self.remote_field.model
+    97	
+    98	    def check(self, **kwargs):
+    99	        return [
+   100	            *super().check(**kwargs),
+   101	            *self._check_related_name_is_valid(),
+   102	            *self._check_related_query_name_is_valid(),
+   103	            *self._check_relation_model_exists(),
+   104	            *self._check_referencing_to_swapped_model(),
+   105	            *self._check_clashes(),
+   106	        ]
+   107	
+   108	    def _check_related_name_is_valid(self):
+   109	        import keyword
+   110	        related_name = self.remote_field.related_name
+   111	        if related_name is None:
+   112	            return []
+   113	        is_valid_id = not keyword.iskeyword(related_name) and related_name.isidentifier()
+   114	        if not (is_valid_id or related_name.endswith('+')):
+   115	            return [
+   116	                checks.Error(
+   117	                    "The name '%s' is invalid related_name for field %s.%s" %
+   118	                    (self.remote_field.related_name, self.model._meta.object_name,
+   119	                     self.name),
+   120	                    hint="Related name must be a valid Python identifier or end with a '+'",
+   121	                    obj=self,
+   122	                    id='fields.E306',
+   123	                )
+   124	            ]
+   125	        return []
+   126	
+   127	    def _check_related_query_name_is_valid(self):
+   128	        if self.remote_field.is_hidden():
+   129	            return []
+   130	        rel_query_name = self.related_query_name()
+   131	        errors = []
+   132	        if rel_query_name.endswith('_'):
+   133	            errors.append(
+   134	                checks.Error(
+   135	                    "Reverse query name '%s' must not end with an underscore."
+   136	                    % rel_query_name,
+   137	                    hint=("Add or change a related_name or related_query_name "
+   138	                          "argument for this field."),
+   139	                    obj=self,
+   140	                    id='fields.E308',
+   141	                )
+   142	            )
+   143	        if LOOKUP_SEP in rel_query_name:
+   144	            errors.append(
+   145	                checks.Error(
+   146	                    "Reverse query name '%s' must not contain '%s'."
+   147	                    % (rel_query_name, LOOKUP_SEP),
+   148	                    hint=("Add or change a related_name or related_query_name "
+   149	                          "argument for this field."),
+   150	                    obj=self,
+   151	                    id='fields.E309',
+   152	                )
+   153	            )
+   154	        return errors
+   155	
+   156	    def _check_relation_model_exists(self):
+   157	        rel_is_missing = self.remote_field.model not in self.opts.apps.get_models()
+   158	        rel_is_string = isinstance(self.remote_field.model, str)
+   159	        model_name = self.remote_field.model if rel_is_string else self.remote_field.model._meta.object_name
+   160	        if rel_is_missing and (rel_is_string or not self.remote_field.model._meta.swapped):
+   161	            return [
+   162	                checks.Error(
+   163	                    "Field defines a relation with model '%s', which is either "
+   164	                    "not installed, or is abstract." % model_name,
+   165	                    obj=self,
+   166	                    id='fields.E300',
+   167	                )
+   168	            ]
+   169	        return []
+   170	
+   171	    def _check_referencing_to_swapped_model(self):
+   172	        if (self.remote_field.model not in self.opts.apps.get_models() and
+   173	                not isinstance(self.remote_field.model, str) and
+   174	                self.remote_field.model._meta.swapped):
+   175	            model = "%s.%s" % (
+   176	                self.remote_field.model._meta.app_label,
+   177	                self.remote_field.model._meta.object_name
+   178	            )
+   179	            return [
+   180	                checks.Error(
+   181	                    "Field defines a relation with the model '%s', which has "
+   182	                    "been swapped out." % model,
+   183	                    hint="Update the relation to point at 'settings.%s'." % self.remote_field.model._meta.swappable,
+   184	                    obj=self,
+   185	                    id='fields.E301',
+   186	                )
+   187	            ]
+   188	        return []
+   189	
+   190	    def _check_clashes(self):
+   191	        """Check accessor and reverse query name clashes."""
+   192	        from django.db.models.base import ModelBase
+   193	
+   194	        errors = []
+   195	        opts = self.model._meta
+   196	
+   197	        # `f.remote_field.model` may be a string instead of a model. Skip if model name is
+   198	        # not resolved.
+   199	        if not isinstance(self.remote_field.model, ModelBase):
+   200	            return []
+   201	
+   202	        # Consider that we are checking field `Model.foreign` and the models
+   203	        # are:
+   204	        #
+   205	        #     class Target(models.Model):
+   206	        #         model = models.IntegerField()
+   207	        #         model_set = models.IntegerField()
+   208	        #
+   209	        #     class Model(models.Model):
+   210	        #         foreign = models.ForeignKey(Target)
+   211	        #         m2m = models.ManyToManyField(Target)
+   212	
+   213	        # rel_opts.object_name == "Target"
+   214	        rel_opts = self.remote_field.model._meta
+   215	        # If the field doesn't install a backward relation on the target model
+   216	        # (so `is_hidden` returns True), then there are no clashes to check
+   217	        # and we can skip these fields.
+   218	        rel_is_hidden = self.remote_field.is_hidden()
+   219	        rel_name = self.remote_field.get_accessor_name()  # i. e. "model_set"
+   220	        rel_query_name = self.related_query_name()  # i. e. "model"
+   221	        field_name = "%s.%s" % (opts.object_name, self.name)  # i. e. "Model.field"
+   222	
+   223	        # Check clashes between accessor or reverse query name of `field`
+   224	        # and any other field name -- i.e. accessor for Model.foreign is
+   225	        # model_set and it clashes with Target.model_set.
+   226	        potential_clashes = rel_opts.fields + rel_opts.many_to_many
+   227	        for clash_field in potential_clashes:
+   228	            clash_name = "%s.%s" % (rel_opts.object_name, clash_field.name)  # i.e. "Target.model_set"
+   229	            if not rel_is_hidden and clash_field.name == rel_name:
+   230	                errors.append(
+   231	                    checks.Error(
+   232	                        "Reverse accessor for '%s' clashes with field name '%s'." % (field_name, clash_name),
+   233	                        hint=("Rename field '%s', or add/change a related_name "
+   234	                              "argument to the definition for field '%s'.") % (clash_name, field_name),
+   235	                        obj=self,
+   236	                        id='fields.E302',
+   237	                    )
+   238	                )
+   239	
+   240	            if clash_field.name == rel_query_name:
+   241	                errors.append(
+   242	                    checks.Error(
+   243	                        "Reverse query name for '%s' clashes with field name '%s'." % (field_name, clash_name),
+   244	                        hint=("Rename field '%s', or add/change a related_name "
+   245	                              "argument to the definition for field '%s'.") % (clash_name, field_name),
+   246	                        obj=self,
+   247	                        id='fields.E303',
+   248	                    )
+   249	                )
+   250	
+   251	        # Check clashes between accessors/reverse query names of `field` and
+   252	        # any other field accessor -- i. e. Model.foreign accessor clashes with
+   253	        # Model.m2m accessor.
+   254	        potential_clashes = (r for r in rel_opts.related_objects if r.field is not self)
+   255	        for clash_field in potential_clashes:
+   256	            clash_name = "%s.%s" % (  # i. e. "Model.m2m"
+   257	                clash_field.related_model._meta.object_name,
+   258	                clash_field.field.name)
+   259	            if not rel_is_hidden and clash_field.get_accessor_name() == rel_name:
+   260	                errors.append(
+   261	                    checks.Error(
+   262	                        "Reverse accessor for '%s' clashes with reverse accessor for '%s'." % (field_name, clash_name),
+   263	                        hint=("Add or change a related_name argument "
+   264	                              "to the definition for '%s' or '%s'.") % (field_name, clash_name),
+   265	                        obj=self,
+   266	                        id='fields.E304',
+   267	                    )
+   268	                )
+   269	
+   270	            if clash_field.get_accessor_name() == rel_query_name:
+   271	                errors.append(
+   272	                    checks.Error(
+   273	                        "Reverse query name for '%s' clashes with reverse query name for '%s'."
+   274	                        % (field_name, clash_name),
+   275	                        hint=("Add or change a related_name argument "
+   276	                              "to the definition for '%s' or '%s'.") % (field_name, clash_name),
+   277	                        obj=self,
+   278	                        id='fields.E305',
+   279	                    )
+   280	                )
+   281	
+   282	        return errors
+   283	
+   284	    def db_type(self, connection):
+   285	        # By default related field will not have a column as it relates to
+   286	        # columns from another table.
+   287	        return None
+   288	
+   289	    def contribute_to_class(self, cls, name, private_only=False, **kwargs):
+   290	
+   291	        super().contribute_to_class(cls, name, private_only=private_only, **kwargs)
+   292	
+   293	        self.opts = cls._meta
+   294	
+   295	        if not cls._meta.abstract:
+   296	            if self.remote_field.related_name:
+   297	                related_name = self.remote_field.related_name
+   298	            else:
+   299	                related_name = self.opts.default_related_name
+   300	            if related_name:
+   301	                related_name = related_name % {
+   302	                    'class': cls.__name__.lower(),
+   303	                    'model_name': cls._meta.model_name.lower(),
+   304	                    'app_label': cls._meta.app_label.lower()
+   305	                }
+   306	                self.remote_field.related_name = related_name
+   307	
+   308	            if self.remote_field.related_query_name:
+   309	                related_query_name = self.remote_field.related_query_name % {
+   310	                    'class': cls.__name__.lower(),
+   311	                    'app_label': cls._meta.app_label.lower(),
+   312	                }
+   313	                self.remote_field.related_query_name = related_query_name
+   314	
+   315	            def resolve_related_class(model, related, field):
+   316	                field.remote_field.model = related
+   317	                field.do_related_class(related, model)
+   318	            lazy_related_operation(resolve_related_class, cls, self.remote_field.model, field=self)
+   319	
+   320	    def deconstruct(self):
+   321	        name, path, args, kwargs = super().deconstruct()
+   322	        if self.remote_field.limit_choices_to:
+   323	            kwargs['limit_choices_to'] = self.remote_field.limit_choices_to
+   324	        if self.remote_field.related_name is not None:
+   325	            kwargs['related_name'] = self.remote_field.related_name
+   326	        if self.remote_field.related_query_name is not None:
+   327	            kwargs['related_query_name'] = self.remote_field.related_query_name
+   328	        return name, path, args, kwargs
+   329	
+   330	    def get_forward_related_filter(self, obj):
+   331	        """
+   332	        Return the keyword arguments that when supplied to
+   333	        self.model.object.filter(), would select all instances related through
+   334	        this field to the remote obj. This is used to build the querysets
+   335	        returned by related descriptors. obj is an instance of
+   336	        self.related_field.model.
+   337	        """
+   338	        return {
+   339	            '%s__%s' % (self.name, rh_field.name): getattr(obj, rh_field.attname)
+   340	            for _, rh_field in self.related_fields
+   341	        }
+   342	
+   343	    def get_reverse_related_filter(self, obj):
+   344	        """
+   345	        Complement to get_forward_related_filter(). Return the keyword
+   346	        arguments that when passed to self.related_field.model.object.filter()
+   347	        select all instances of self.related_field.model related through
+   348	        this field to obj. obj is an instance of self.model.
+   349	        """
+   350	        base_filter = {
+   351	            rh_field.attname: getattr(obj, lh_field.attname)
+   352	            for lh_field, rh_field in self.related_fields
+   353	        }
+   354	        descriptor_filter = self.get_extra_descriptor_filter(obj)
+   355	        base_q = Q(**base_filter)
+   356	        if isinstance(descriptor_filter, dict):
+   357	            return base_q & Q(**descriptor_filter)
+   358	        elif descriptor_filter:
+   359	            return base_q & descriptor_filter
+   360	        return base_q
+   361	
+   362	    @property
+   363	    def swappable_setting(self):
+   364	        """
+   365	        Get the setting that this is powered from for swapping, or None
+   366	        if it's not swapped in / marked with swappable=False.
+   367	        """
+   368	        if self.swappable:
+   369	            # Work out string form of "to"
+   370	            if isinstance(self.remote_field.model, str):
+   371	                to_string = self.remote_field.model
+   372	            else:
+   373	                to_string = self.remote_field.model._meta.label
+   374	            return apps.get_swappable_settings_name(to_string)
+   375	        return None
+   376	
+   377	    def set_attributes_from_rel(self):
+   378	        self.name = (
+   379	            self.name or
+   380	            (self.remote_field.model._meta.model_name + '_' + self.remote_field.model._meta.pk.name)
+   381	        )
+   382	        if self.verbose_name is None:
+   383	            self.<response clipped><NOTE>To save on context only part of this file has been shown to you. You should retry this tool after you have searched inside the file with `grep -n` in order to find the line numbers of what you are looking for.</NOTE>
+
