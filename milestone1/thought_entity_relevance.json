@@ -1,0 +1,1517 @@
+{
+    "gpt-5-mini": {
+        "django__django-13109": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [],
+            "25": [],
+            "26": [],
+            "27": [],
+            "28": [],
+            "29": [],
+            "30": [],
+            "31": [],
+            "32": [],
+            "33": [],
+            "34": [
+                "ForeignKey.validate()",
+                "_base_manager",
+                "_default_manager",
+                "ArticleManager",
+                "qs.filter(archived=False)",
+                "Article",
+                "Article.objects = ArticleManager()",
+                "FavoriteAricles",
+                "FavoriteAriclesForm",
+                "FavoriteArticle",
+                "Article._base_manager.all()",
+                "archived article selection",
+                "validation fails for archived article",
+                "article instance with id 123 does not exist.",
+                "django/db/models/fields/related.py"
+            ],
+            "35": [],
+            "36": [],
+            "37": [
+                "ForeignKey.validate()",
+                "_base_manager",
+                "_default_manager",
+                "Article",
+                "Article._base_manager.all()",
+                "archived article selection",
+                "django/db/models/fields/related.py"
+            ],
+            "38": []
+        },
+        "django__django-17029": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [
+                "apps.clear_cache()",
+                "get_swappable_settings_name",
+                "cache not cleared",
+                "django-stubs",
+                "proposed fix: self.get_swappable_settings_name.cache_clear()"
+            ],
+            "18": [],
+            "19": [],
+            "20": [
+                "apps.clear_cache()",
+                "get_swappable_settings_name",
+                "cache not cleared",
+                "proposed fix: self.get_swappable_settings_name.cache_clear()"
+            ],
+            "21": []
+        },
+        "django__django-10880": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [],
+            "25": [],
+            "26": [
+                "Count annotation",
+                "Case condition",
+                "distinct=True",
+                "COUNT(DISTINCTCASE WHEN ...)",
+                "missing space between DISTINCT and CASE"
+            ],
+            "27": [],
+            "28": [],
+            "29": [],
+            "30": [],
+            "31": [
+                "Case condition",
+                "distinct=True",
+                "COUNT(DISTINCTCASE WHEN ...)",
+                "missing space between DISTINCT and CASE"
+            ],
+            "32": []
+        },
+        "django__django-13837": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [
+                "django.utils.autoreload.get_child_arguments",
+                "python -m pkg_other_than_django runserver",
+                "python -m django",
+                "-m argument detection",
+                "__file__",
+                "__main__.__spec__",
+                "__main__.__spec__ is not None",
+                "__main__.__spec__.parent",
+                "__main__.__package__",
+                "__main__.py",
+                "get_child_arguments",
+                "directory",
+                "zipfile"
+            ],
+            "25": [],
+            "26": [],
+            "27": [
+                "python -m django",
+                "__file__",
+                "__main__.__spec__",
+                "__main__.__spec__ is not None",
+                "__main__.__spec__.parent",
+                "__main__.__package__",
+                "directory / zipfile sys.path entry",
+                "__main__.py",
+                "get_child_arguments",
+                "directory",
+                "zipfile"
+            ],
+            "28": []
+        },
+        "django__django-16661": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [],
+            "25": [],
+            "26": [],
+            "27": [],
+            "28": [],
+            "29": [],
+            "30": [],
+            "31": [],
+            "32": [],
+            "33": [],
+            "34": [],
+            "35": [],
+            "36": [],
+            "37": [],
+            "38": [],
+            "39": [],
+            "40": [],
+            "41": [],
+            "42": [],
+            "43": [],
+            "44": [],
+            "45": [],
+            "46": [],
+            "47": [],
+            "48": [],
+            "49": [],
+            "50": [],
+            "51": [],
+            "52": [],
+            "53": [],
+            "54": [],
+            "55": [],
+            "56": [],
+            "57": [],
+            "58": [],
+            "59": [],
+            "60": [],
+            "61": [],
+            "62": [],
+            "63": [],
+            "64": [],
+            "65": [],
+            "66": [],
+            "67": [],
+            "68": [],
+            "69": [],
+            "70": [],
+            "71": [],
+            "72": [],
+            "73": [],
+            "74": [],
+            "75": [],
+            "76": [],
+            "77": [],
+            "78": [],
+            "79": [],
+            "80": [],
+            "81": [],
+            "82": [],
+            "83": [],
+            "84": [],
+            "85": [],
+            "86": [],
+            "87": [],
+            "88": [],
+            "89": [],
+            "90": [],
+            "91": [],
+            "92": [],
+            "93": [
+                "ModelAdmin.lookup_allowed()",
+                "foreign key as primary key",
+                "tests/modeladmin/tests.py",
+                "Country",
+                "Place",
+                "Restaurant",
+                "list_filter",
+                "lookups for 'restaurant__place__country'",
+                "ma.lookup_allowed('restaurant__place__country', 'test_value')",
+                "admin confuses FK primary key with concrete inheritance"
+            ],
+            "94": []
+        },
+        "pylint-dev__pylint-7277": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [
+                "pylint",
+                "sys.path",
+                "runpy",
+                "pylint/__init__.py",
+                "pylint/__init__.py#L99",
+                "pylint extension bundles libraries",
+                "os.getcwd()"
+            ],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [
+                "pylint",
+                "sys.path",
+                "runpy",
+                "pylint/__init__.py",
+                "pylint/__init__.py#L99",
+                "expected check for \"\"",
+                "expected check for \".\"",
+                "os.getcwd()"
+            ],
+            "25": []
+        },
+        "sphinx-doc__sphinx-11510": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [],
+            "11": [],
+            "12": [],
+            "13": [],
+            "14": [],
+            "15": [],
+            "16": [],
+            "17": [],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [],
+            "22": [],
+            "23": [],
+            "24": [],
+            "25": [],
+            "26": [],
+            "27": [],
+            "28": [],
+            "29": [],
+            "30": [],
+            "31": [],
+            "32": [],
+            "33": [],
+            "34": [],
+            "35": [],
+            "36": [],
+            "37": [],
+            "38": [],
+            "39": [],
+            "40": [],
+            "41": [],
+            "42": [],
+            "43": [],
+            "44": [],
+            "45": [
+                "source-read event",
+                "include'd files",
+                "custom extension",
+                "result.replace(\"&REPLACE_ME;\", \"REPLACED\")",
+                "&REPLACE_ME;",
+                "REPLACED",
+                "HTML"
+            ],
+            "46": [],
+            "47": [],
+            "48": [
+                "source-read event",
+                "include'd files",
+                "custom extension",
+                "index.rst",
+                "something-to-include.rst",
+                "&REPLACE_ME;",
+                "REPLACED",
+                ".. include:: something-to-include.rst",
+                "something-to-include.rst",
+                "HTML"
+            ],
+            "49": []
+        }
+    },
+    "deepseek-v3": {
+        "sphinx-doc__sphinx-9281": {
+            "1": [
+                "Sphinx",
+                "Python Enum",
+                "Enum default value rendering",
+                "function signature rendering",
+                "autodoc extension",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "2": [
+                "Sphinx",
+                "Python Enum",
+                "function signature rendering",
+                "autodoc extension",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "3": [
+                "Sphinx",
+                "function signature rendering",
+                "autodoc extension"
+            ],
+            "4": [
+                "Sphinx",
+                "Enum default value rendering",
+                "function signature rendering",
+                "ugly enum rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA",
+                "actual signature: <MyEnum.ValueA: 10>"
+            ],
+            "5": [
+                "Sphinx",
+                "Python Enum",
+                "function signature rendering",
+                "MyEnum.ValueA"
+            ],
+            "6": [
+                "Enum default value rendering"
+            ],
+            "7": [
+                "Sphinx",
+                "Python Enum",
+                "Enum default value rendering",
+                "function signature rendering",
+                "ugly enum rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA",
+                "expected signature: MyEnum.ValueA",
+                "actual signature: <MyEnum.ValueA: 10>"
+            ],
+            "8": [],
+            "9": [
+                "Sphinx",
+                "Python Enum",
+                "function signature rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "10": [],
+            "11": [
+                "Sphinx",
+                "Enum default value rendering",
+                "function signature rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "12": [
+                "Python Enum",
+                "Enum default value rendering",
+                "function signature rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA",
+                "ugly_enum_func"
+            ],
+            "13": [
+                "Python Enum"
+            ],
+            "14": [
+                "Sphinx",
+                "Enum default value rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "15": [],
+            "16": [],
+            "17": [
+                "Sphinx",
+                "Python Enum",
+                "Enum default value rendering",
+                "function signature rendering",
+                "<MyEnum.ValueA: 10>",
+                "MyEnum.ValueA"
+            ],
+            "18": []
+        },
+        "sympy__sympy-14531": {
+            "1": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr",
+                "code generation"
+            ],
+            "2": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr"
+            ],
+            "3": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sstr",
+                "code generation"
+            ],
+            "4": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr"
+            ],
+            "5": [
+                "StrPrinter",
+                "sympy_integers=True",
+                "sstr"
+            ],
+            "6": [
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr",
+                "subexpressions ignore printer settings"
+            ],
+            "7": [
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr",
+                "subexpressions ignore printer settings"
+            ],
+            "8": [],
+            "9": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sympy_integers=True",
+                "sstr"
+            ],
+            "10": [
+                "sympy_integers=True",
+                "sstr",
+                "S(1)/2",
+                "Eq(x, S(1)/2)",
+                "Limit(x, x, S(1)/2)",
+                "code generation"
+            ],
+            "11": [
+                "StrPrinter",
+                "sympy_integers=True",
+                "sstr",
+                "sstr(x + S(1)/2, sympy_integers=True)",
+                "sstr(Eq(x, S(1)/2), sympy_integers=True)",
+                "sstr(Limit(x, x, S(1)/2), sympy_integers=True)",
+                "S(1)/2",
+                "Eq(x, S(1)/2)",
+                "Limit(x, x, S(1)/2)",
+                "python(Eq(x, y))",
+                "unexpected output: e = Eq(x, y)"
+            ],
+            "12": [
+                "StrPrinter",
+                "sstr"
+            ],
+            "13": [],
+            "14": [
+                "sstr"
+            ],
+            "15": [
+                "StrPrinter",
+                "sympy_integers=True",
+                "sstr",
+                "S(1)/2",
+                "Eq(x, S(1)/2)",
+                "Limit(x, x, S(1)/2)",
+                "expected symbol declarations"
+            ],
+            "16": [],
+            "17": [
+                "StrPrinter",
+                "sstr"
+            ],
+            "18": [
+                "StrPrinter",
+                "StrPrinter settings ignored",
+                "sstr"
+            ]
+        },
+        "sympy__sympy-24539": {
+            "1": [
+                "PolyElement.as_expr()",
+                "as_expr() not accepting symbols",
+                "ignores provided symbols",
+                "self.ring.symbols"
+            ],
+            "2": [],
+            "3": [
+                "sympy.polys.rings",
+                "f.as_expr(U, V, W)",
+                "ignores provided symbols",
+                "self.ring.symbols"
+            ],
+            "4": [
+                "PolyElement.as_expr()",
+                "ignores provided symbols",
+                "self.ring.symbols",
+                "wrong number of symbols error",
+                "correct number of symbols ignored"
+            ],
+            "5": [
+                "symbols(\"u,v,w\")",
+                "f.as_expr(U, V, W)",
+                "ignores provided symbols",
+                "self.ring.symbols"
+            ],
+            "6": [
+                "symbols(\"u,v,w\")",
+                "ignores provided symbols",
+                "self.ring.symbols"
+            ],
+            "7": [],
+            "8": [
+                "sympy.polys.rings",
+                "symbols(\"u,v,w\")",
+                "ignores provided symbols",
+                "self.ring.symbols"
+            ],
+            "9": [],
+            "10": []
+        },
+        "astropy__astropy-13033": {
+            "1": [
+                "TimeSeries",
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal",
+                "ValueError: TimeSeries object is invalid - expected 'time' as the first columns but found 'time'",
+                "flux"
+            ],
+            "2": [
+                "TimeSeries",
+                "time"
+            ],
+            "3": [
+                "TimeSeries",
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal"
+            ],
+            "4": [
+                "TimeSeries",
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal",
+                "flux"
+            ],
+            "5": [
+                "TimeSeries",
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal",
+                "Steps to Reproduce",
+                "flux"
+            ],
+            "6": [],
+            "7": [
+                "TimeSeries",
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal",
+                "ValueError: TimeSeries object is invalid - expected 'time' as the first columns but found 'time'",
+                "flux"
+            ],
+            "8": [
+                "required columns",
+                "_required_columns",
+                "required column removal"
+            ],
+            "9": [
+                "time",
+                "flux"
+            ],
+            "10": [],
+            "11": [
+                "required columns",
+                "time",
+                "_required_columns",
+                "required column removal"
+            ],
+            "12": [],
+            "13": [],
+            "14": []
+        },
+        "django__django-11138": {
+            "1": [
+                "TIME_ZONE (DATABASES setting)",
+                "DATABASES",
+                "USE_TZ = True",
+                "MySQL",
+                "SQLite",
+                "Oracle",
+                "tz1",
+                "tz2",
+                "CONVERT_TZ",
+                "timezone tables in MySQL",
+                "expected conversion from database TIME_ZONE to app TIME_ZONE",
+                "django/db/backends/mysql/operations.py",
+                "operations.py#L49",
+                "settings.py",
+                "'ENGINE': 'django.db.backends.mysql'",
+                "USE_TZ"
+            ],
+            "2": [
+                "DATABASES",
+                "MySQL",
+                "CONVERT_TZ",
+                "django/db/backends/mysql/operations.py",
+                "operations.py#L49",
+                "settings.py"
+            ],
+            "3": [
+                "DATABASES",
+                "CONVERT_TZ",
+                "settings.py"
+            ],
+            "4": [],
+            "5": [
+                "DATABASES",
+                "legacy database",
+                "operations.py#L49",
+                "settings.py",
+                "USE_TZ"
+            ]
+        },
+        "django__django-11141": {
+            "1": [
+                "migrations directories without __init__.py",
+                "Python 3",
+                "namespace package",
+                "__init__.py",
+                "__file__ attribute",
+                "migrate command",
+                "migration file discovery",
+                "pkgutil.iter_modules()",
+                "__path__",
+                "implicit namespace packages"
+            ],
+            "2": [
+                "migration file discovery",
+                "pkgutil.iter_modules()"
+            ],
+            "3": [
+                "__file__ attribute",
+                "pkgutil.iter_modules()"
+            ],
+            "4": [
+                "Python 3",
+                "namespace package",
+                "__init__.py",
+                "migrate command",
+                "migration file discovery",
+                "pkgutil.iter_modules()",
+                "implicit namespace packages"
+            ],
+            "5": [
+                "namespace package",
+                "__init__.py",
+                "migrate command",
+                "pkgutil.iter_modules()",
+                "__path__",
+                "implicit namespace packages"
+            ],
+            "6": [],
+            "7": [
+                "namespace package",
+                "__file__ attribute",
+                "migration file discovery",
+                "pkgutil.iter_modules()",
+                "__path__",
+                "implicit namespace packages",
+                "namespace packages (implicit or otherwise)"
+            ]
+        },
+        "django__django-11211": {
+            "1": [
+                "prefetch_related",
+                "GenericForeignKey (GFK)",
+                "UUID primary key",
+                "Foo",
+                "Bar",
+                "ContentType",
+                "GFK",
+                "UUID",
+                "django orm engine"
+            ],
+            "2": [
+                "prefetch_related",
+                "GenericForeignKey (GFK)",
+                "UUID primary key",
+                "Foo",
+                "Bar",
+                "ContentType",
+                "GFK",
+                "UUID"
+            ],
+            "3": [
+                "prefetch_related",
+                "GenericForeignKey (GFK)",
+                "UUID primary key",
+                "Bar",
+                "UUID"
+            ],
+            "4": [
+                "UUID primary key",
+                "ContentType",
+                "GFK",
+                "UUID"
+            ],
+            "5": [],
+            "6": [
+                "UUID primary key",
+                "ContentType",
+                "reproduction steps",
+                "GFK",
+                "UUID"
+            ],
+            "7": []
+        },
+        "django__django-12308": {
+            "1": [
+                "JSONField",
+                "Django admin",
+                "django.contrib.admin.utils.display_for_field",
+                "display_for_field",
+                "JSONField.prepare_value",
+                "prepare_value",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "2": [],
+            "3": [
+                "JSONField",
+                "readonly fields",
+                "{\"foo\": \"bar\"}",
+                "{'foo': 'bar'}",
+                "display_for_field",
+                "prepare_value",
+                "InvalidJSONInput",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "4": [
+                "JSONField",
+                "readonly fields",
+                "{\"foo\": \"bar\"}",
+                "{'foo': 'bar'}",
+                "display_for_field",
+                "JSONField.prepare_value",
+                "prepare_value",
+                "json.dumps",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "5": [
+                "JSONField",
+                "display_for_field",
+                "JSONField.prepare_value",
+                "prepare_value",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "6": [
+                "JSONField",
+                "readonly fields",
+                "invalid JSON display",
+                "display_for_field",
+                "JSONField.prepare_value",
+                "prepare_value",
+                "InvalidJSONInput",
+                "proposed fix: special case for JSONField in display_for_field",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "7": [],
+            "8": [
+                "JSONField",
+                "display_for_field",
+                "JSONField.prepare_value",
+                "prepare_value",
+                "proposed fix: special case for JSONField in display_for_field",
+                "dict",
+                "admin",
+                "JSON"
+            ],
+            "9": []
+        },
+        "django__django-14351": {
+            "1": [
+                "Q object",
+                "Q.__or__",
+                "OR'd Q objects",
+                "dunder related lookups",
+                "get_default_columns",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "property_groups.values_list(\"id\", flat=True)",
+                "agent__property_groups__count=0",
+                "ProgrammingError: subquery must return only one column",
+                "alias U0",
+                "cols[0].alias == 'U0'",
+                "django/db/models/sql/query.py:233",
+                "PropertyGroup",
+                "PropertyGroupQuerySet",
+                "property_propertygroup",
+                "django.db.utils.ProgrammingError: subquery must return only one column"
+            ],
+            "2": [
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "ProgrammingError: subquery must return only one column",
+                "PropertyGroup"
+            ],
+            "3": [
+                "Q object"
+            ],
+            "4": [
+                "Q object",
+                "get_default_columns",
+                "alias U0",
+                "cols[0].alias == 'U0'",
+                "django/db/models/sql/query.py:233"
+            ],
+            "5": [
+                "Q object",
+                "OR'd Q objects",
+                "get_default_columns",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "agent__property_groups__count=0",
+                "alias U0",
+                "cols[0].alias == 'U0'",
+                "django/db/models/sql/query.py:233",
+                "PropertyGroup",
+                "property_propertygroup"
+            ],
+            "6": [
+                "get_default_columns"
+            ],
+            "7": [
+                "Q object",
+                "OR'd Q objects",
+                "get_default_columns"
+            ],
+            "8": [
+                "Q object",
+                "OR'd Q objects",
+                "get_default_columns",
+                "alias U0",
+                "cols[0].alias == 'U0'"
+            ],
+            "9": [
+                "Q object",
+                "OR'd Q objects"
+            ],
+            "10": [
+                "Q object",
+                "Q.__or__",
+                "OR'd Q objects",
+                "get_default_columns",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "agent__property_groups__count=0",
+                "ProgrammingError: subquery must return only one column",
+                "PropertyGroup",
+                "property_propertygroup"
+            ],
+            "11": [
+                "Q object",
+                "Q.__or__",
+                "OR'd Q objects",
+                "get_default_columns",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "property_groups.values_list(\"id\", flat=True)",
+                "agent__property_groups__count=0",
+                "PropertyGroup",
+                "PropertyGroupQuerySet",
+                "property_propertygroup"
+            ],
+            "12": [
+                "get_default_columns",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "agent__property_groups__count=0",
+                "PropertyGroup",
+                "PropertyGroupQuerySet",
+                "property_propertygroup"
+            ],
+            "13": [
+                "Q object",
+                "OR'd Q objects",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "agent__property_groups__count=0",
+                "PropertyGroup",
+                "property_propertygroup"
+            ],
+            "14": [
+                "ProgrammingError: subquery must return only one column",
+                "django/db/models/sql/query.py:233"
+            ],
+            "15": [],
+            "16": [],
+            "17": [
+                "Q object",
+                "Q.__or__",
+                "OR'd Q objects",
+                "agent__property_groups__id__in",
+                "agent__property_groups__in",
+                "agent__property_groups__count=0",
+                "django/db/models/sql/query.py:233",
+                "PropertyGroup",
+                "property_propertygroup"
+            ],
+            "18": [
+                "ProgrammingError: subquery must return only one column",
+                "django/db/models/sql/query.py:233"
+            ]
+        },
+        "django__django-15268": {
+            "1": [
+                "AlterFooTogether",
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "migration optimizer",
+                "remove constraints operation",
+                "add constraints operation",
+                "operations list example",
+                "unique_together=set()",
+                "index_together=set()"
+            ],
+            "2": [],
+            "3": [
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "operations list example",
+                "migrations.AlterIndexTogether",
+                "index_together=set()"
+            ],
+            "4": [
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "remove constraints operation",
+                "add constraints operation",
+                "migrations.AlterIndexTogether",
+                "index_together=set()"
+            ],
+            "5": [
+                "AlterFooTogether",
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "migration optimizer",
+                "operations list example",
+                "unique_together=set()"
+            ],
+            "6": [
+                "AlterFooTogether",
+                "AlterUniqueTogether",
+                "AlterIndexTogether"
+            ],
+            "7": [
+                "Optimize multiple AlterFooTogether operations into one",
+                "AlterFooTogether",
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "operations list example",
+                "migrations.AlterIndexTogether",
+                "unique_together=set()"
+            ],
+            "8": [],
+            "9": [
+                "Optimize multiple AlterFooTogether operations into one",
+                "AlterFooTogether",
+                "AlterUniqueTogether",
+                "AlterIndexTogether",
+                "unique_together=set()",
+                "index_together=set()"
+            ],
+            "10": [],
+            "11": [
+                "Optimize multiple AlterFooTogether operations into one",
+                "AlterFooTogether",
+                "AlterIndexTogether"
+            ]
+        },
+        "pydata__xarray-4695": {
+            "1": [
+                "xarray",
+                "DataArray",
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "coords",
+                "fill method",
+                "pad (ffill)",
+                "nearest",
+                "dimension name should be irrelevant"
+            ],
+            "2": [
+                "xarray",
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "pad (ffill)",
+                "nearest"
+            ],
+            "3": [
+                "nearest"
+            ],
+            "4": [
+                "nearest"
+            ],
+            "5": [
+                "xarray",
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "nearest"
+            ],
+            "6": [
+                "xarray",
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "7": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "8": [
+                ".loc",
+                "dims"
+            ],
+            "9": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "nearest"
+            ],
+            "10": [],
+            "11": [],
+            "12": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "13": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method"
+            ],
+            "14": [],
+            "15": [
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "16": [
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "dimension name should be irrelevant"
+            ],
+            "17": [
+                "dimension name \"method\"",
+                "dims",
+                "coords",
+                "fill method"
+            ],
+            "18": [],
+            "19": [],
+            "20": [],
+            "21": [
+                "dimension name \"method\"",
+                "dims",
+                "coords",
+                "fill method",
+                "pad (ffill)"
+            ],
+            "22": [],
+            "23": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "24": [
+                "dimension name \"method\"",
+                "dims",
+                "pad (ffill)"
+            ],
+            "25": [
+                "dimension name \"method\"",
+                "dims",
+                "fill method"
+            ],
+            "26": [],
+            "27": [
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "28": [],
+            "29": [
+                "import numpy as np\r\nfrom xarray import DataArray\r\nempty = np.zeros((2,2))\r\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\r\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\r\n\r\nprint(D1.loc[dict(dim1='x', dim2='a')])    # works\r\nprint(D2.loc[dict(dim1='x', method='a')])"
+            ],
+            "30": [
+                "fill method"
+            ],
+            "31": [
+                "dimension name \"method\"",
+                "dims",
+                "fill method",
+                "nearest"
+            ],
+            "32": [
+                "dimension name \"method\"",
+                "dims",
+                "fill method"
+            ],
+            "33": [
+                "dimension name \"method\"",
+                "dims",
+                "ValueError",
+                "fill method"
+            ],
+            "34": [
+                "xarray",
+                "DataArray",
+                ".loc",
+                "dimension name \"method\"",
+                "dims",
+                "coords",
+                "D1.loc[dict(dim1='x', dim2='a')]",
+                "D2.loc[dict(dim1='x', method='a')]"
+            ],
+            "35": [],
+            "36": [
+                "dims",
+                "fill method"
+            ],
+            "37": []
+        },
+        "pylint-dev__pylint-7277": {
+            "1": [
+                "pylint",
+                "sys.path",
+                "removes first item from sys.path",
+                "runpy",
+                "pylint/__init__.py#L99",
+                "os.getcwd()"
+            ],
+            "2": [
+                "pylint",
+                "sys.path",
+                "removes first item from sys.path",
+                "pylint/__init__.py#L99",
+                "os.getcwd()"
+            ],
+            "3": [],
+            "4": [
+                "pylint",
+                "sys.path"
+            ],
+            "5": [],
+            "6": [
+                "pylint",
+                "sys.path",
+                "pylint/__init__.py#L99",
+                "os.getcwd()"
+            ],
+            "7": [],
+            "8": [],
+            "9": [],
+            "10": [
+                "pylint",
+                "sys.path"
+            ],
+            "11": [],
+            "12": [
+                "pylint",
+                "sys.path",
+                "os.getcwd()"
+            ],
+            "13": [],
+            "14": [
+                "pylint",
+                "sys.path"
+            ],
+            "15": [],
+            "16": [],
+            "17": []
+        },
+        "sympy__sympy-24443": {
+            "1": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "inverted generator",
+                "gens",
+                "PermutationGroup generators",
+                "bug in handling inverted generators"
+            ],
+            "2": [
+                "_check_homomorphism",
+                "homomorphism"
+            ],
+            "3": [
+                "_check_homomorphism",
+                "homomorphism",
+                "inverted generator",
+                "gens"
+            ],
+            "4": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "inverted generator",
+                "gens",
+                "PermutationGroup generators",
+                "bug in handling inverted generators"
+            ],
+            "5": [],
+            "6": [
+                "PermutationGroups",
+                "PermutationGroup generators"
+            ],
+            "7": [
+                "PermutationGroups",
+                "gens",
+                "_image()"
+            ],
+            "8": [
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators",
+                "_image()"
+            ],
+            "9": [
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators"
+            ],
+            "10": [
+                "_check_homomorphism",
+                "homomorphism",
+                "gens"
+            ],
+            "11": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators",
+                "_image()"
+            ],
+            "12": [
+                "_check_homomorphism",
+                "homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators"
+            ],
+            "13": [
+                "_check_homomorphism",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "gens",
+                "_image()"
+            ],
+            "14": [],
+            "15": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators",
+                "homomorphism validation failure",
+                "_image()"
+            ],
+            "16": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators",
+                "_image()"
+            ],
+            "17": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators",
+                "_image()"
+            ],
+            "18": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "inverted generator",
+                "gens",
+                "PermutationGroup generators",
+                "bug in handling inverted generators"
+            ],
+            "19": [
+                "PermutationGroups",
+                "gens"
+            ],
+            "20": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "PermutationGroup generators",
+                "homomorphism validation failure",
+                "_image()"
+            ],
+            "21": [
+                "_check_homomorphism",
+                "homomorphism",
+                "DihedralGroup(3)",
+                "D3 = DihedralGroup(3)",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "bug in handling inverted generators"
+            ],
+            "22": [
+                "_check_homomorphism",
+                "PermutationGroups",
+                "homomorphism",
+                "ValueError: The given images do not define a homomorphism",
+                "inverted generator",
+                "gens",
+                "PermutationGroup generators",
+                "_image()"
+            ],
+            "23": []
+        }
+    }
+}
