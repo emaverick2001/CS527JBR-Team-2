@@ -9,7 +9,7 @@ def locate_navigation(model_name: str, instance_id: str) -> list[int]:
   :return: list of steps that conduct a navigation action
   """
   # first read the trajectory file based on model_name and instance_id
-  file_name = f"../Trajectories/{model_name}/{instance_id}/{instance_id}.traj"
+  file_name = f"../Trajectories/{model_name}/{instance_id}.traj"
   with open(file_name, 'r') as f:
       traj_data = f.read()
 
