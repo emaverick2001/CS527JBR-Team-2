@@ -1,0 +1,101 @@
+{
+    "gpt-5-mini": {
+        "django__django-13109": {
+            "tests": [
+                {
+                    "path": "/testbed/reproduce_fk_validate.py",
+                    "code": "'import django\nfrom django.conf import settings\nfrom django import forms\nfrom django.db import models, connection, router\n\n\ndef main():\n    settings.configure(\n        DEBUG=True,\n        SECRET_KEY='\"'\"'test'\"'\"',\n        DATABASES={'\"'\"'default'\"'\"': {'\"'\"'ENGINE'\"'\"': '\"'\"'django.db.backends.sqlite3'\"'\"', '\"'\"'NAME'\"'\"': '\"'\"':memory:'\"'\"'}},\n        INSTALLED_APPS=['\"'\"'myapp'\"'\"'],\n    )\n    django.setup()\n\n    # Import models after setup\n    from myapp.models import Article, FavoriteArticle\n\n    # Create database tables for models\n    with connection.schema_editor() as schema_editor:\n        schema_editor.create_model(Article)\n        schema_editor.create_model(FavoriteArticle)\n\n    # Create an archived article\n    a1 = Article.objects._base_manager.create(title='\"'\"'Visible'\"'\"', archived=False)\n    a2 = Article.objects._base_manager.create(title='\"'\"'Archived'\"'\"', archived=True)\n\n    # Define the form that uses base manager queryset\n    class FavoriteArticleForm(forms.ModelForm):\n        class Meta:\n            model = FavoriteArticle\n            fields = '\"'\"'__all__'\"'\"'\n\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            # Use the base manager to include archived articles\n            self.fields['\"'\"'article'\"'\"'].queryset = Article._base_manager.all()\n\n    # Simulate form submission selecting the archived article\n    form = FavoriteArticleForm(data={'\"'\"'article'\"'\"': a2.pk})\n    print('\"'\"'Form is_valid():'\"'\"', form.is_valid())\n    if not form.is_valid():\n        print('\"'\"'Errors:'\"'\"', form.errors)\n    else:\n        obj = form.save()\n        print('\"'\"'Saved favorite article:'\"'\"', obj)\n\n\nif __name__ == '\"'\"'__main__'\"'\"':\n    main()\n'"
+                }
+            ],
+            "count": 1
+        },
+        "django__django-17029": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-10880": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-13837": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-16661": {
+            "tests": [],
+            "count": 0
+        },
+        "pylint-dev__pylint-7277": {
+            "tests": [],
+            "count": 0
+        },
+        "sphinx-doc__sphinx-11510": {
+            "tests": [],
+            "count": 0
+        }
+    },
+    "deepseek-v3": {
+        "sphinx-doc__sphinx-9281": {
+            "tests": [],
+            "count": 0
+        },
+        "sympy__sympy-14531": {
+            "tests": [
+                {
+                    "path": "/testbed/test_str_printer.py",
+                    "code": "from sympy import symbols, Eq, Limit, S, sstr\n\nx, y = symbols('\"'\"'x y'\"'\"')\n\n# Test sstr with sympy_integers=True\nprint(sstr(x + S(1)/2, sympy_integers=True))  # Expected: '\"'\"'x + S(1)/2'\"'\"'\nprint(sstr(Eq(x, S(1)/2), sympy_integers=True))  # Expected: '\"'\"'Eq(x, S(1)/2)'\"'\"'\nprint(sstr(Limit(x, x, S(1)/2), sympy_integers=True))  # Expected: '\"'\"'Limit(x, x, S(1)/2)'\"'\"'\n\n# Test python function\nprint(python(Eq(x, y)))  # Expected: '\"'\"'x = Symbol(\\'\"'\"'x\\'\"'\"')\\ny = Symbol(\\'\"'\"'y\\'\"'\"')\\ne = Eq(x, y)'\"'\"'"
+                }
+            ],
+            "count": 1
+        },
+        "sympy__sympy-24539": {
+            "tests": [],
+            "count": 0
+        },
+        "astropy__astropy-13033": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-11138": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-11141": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-11211": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-12308": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-14351": {
+            "tests": [],
+            "count": 0
+        },
+        "django__django-15268": {
+            "tests": [],
+            "count": 0
+        },
+        "pydata__xarray-4695": {
+            "tests": [
+                {
+                    "path": "/testbed/reproduce_bug.py",
+                    "code": "import numpy as np\nfrom xarray import DataArray\nempty = np.zeros((2,2))\nD1 = DataArray(empty, dims=['\"'\"'dim1'\"'\"', '\"'\"'dim2'\"'\"'],   coords={'\"'\"'dim1'\"'\"':['\"'\"'x'\"'\"', '\"'\"'y'\"'\"'], '\"'\"'dim2'\"'\"':['\"'\"'a'\"'\"', '\"'\"'b'\"'\"']})\nD2 = DataArray(empty, dims=['\"'\"'dim1'\"'\"', '\"'\"'method'\"'\"'], coords={'\"'\"'dim1'\"'\"':['\"'\"'x'\"'\"', '\"'\"'y'\"'\"'], '\"'\"'method'\"'\"':['\"'\"'a'\"'\"', '\"'\"'b'\"'\"']})\n\nprint(D1.loc[dict(dim1='\"'\"'x'\"'\"', dim2='\"'\"'a'\"'\"')])    # should work\nprint(D2.loc[dict(dim1='\"'\"'x'\"'\"', method='\"'\"'a'\"'\"')])  # should fail with ValueError"
+                }
+            ],
+            "count": 1
+        },
+        "pylint-dev__pylint-7277": {
+            "tests": [],
+            "count": 0
+        },
+        "sympy__sympy-24443": {
+            "tests": [],
+            "count": 0
+        }
+    }
+}
