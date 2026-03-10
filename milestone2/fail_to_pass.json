@@ -4,14 +4,19 @@
             "tests": [
                 {
                     "path": "/testbed/reproduce_fk_validate.py",
-                    "code": "'import django\nfrom django.conf import settings\nfrom django import forms\nfrom django.db import models, connection, router\n\n\ndef main():\n    settings.configure(\n        DEBUG=True,\n        SECRET_KEY='\"'\"'test'\"'\"',\n        DATABASES={'\"'\"'default'\"'\"': {'\"'\"'ENGINE'\"'\"': '\"'\"'django.db.backends.sqlite3'\"'\"', '\"'\"'NAME'\"'\"': '\"'\"':memory:'\"'\"'}},\n        INSTALLED_APPS=['\"'\"'myapp'\"'\"'],\n    )\n    django.setup()\n\n    # Import models after setup\n    from myapp.models import Article, FavoriteArticle\n\n    # Create database tables for models\n    with connection.schema_editor() as schema_editor:\n        schema_editor.create_model(Article)\n        schema_editor.create_model(FavoriteArticle)\n\n    # Create an archived article\n    a1 = Article.objects._base_manager.create(title='\"'\"'Visible'\"'\"', archived=False)\n    a2 = Article.objects._base_manager.create(title='\"'\"'Archived'\"'\"', archived=True)\n\n    # Define the form that uses base manager queryset\n    class FavoriteArticleForm(forms.ModelForm):\n        class Meta:\n            model = FavoriteArticle\n            fields = '\"'\"'__all__'\"'\"'\n\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            # Use the base manager to include archived articles\n            self.fields['\"'\"'article'\"'\"'].queryset = Article._base_manager.all()\n\n    # Simulate form submission selecting the archived article\n    form = FavoriteArticleForm(data={'\"'\"'article'\"'\"': a2.pk})\n    print('\"'\"'Form is_valid():'\"'\"', form.is_valid())\n    if not form.is_valid():\n        print('\"'\"'Errors:'\"'\"', form.errors)\n    else:\n        obj = form.save()\n        print('\"'\"'Saved favorite article:'\"'\"', obj)\n\n\nif __name__ == '\"'\"'__main__'\"'\"':\n    main()\n'"
+                    "code": "import django\nfrom django.conf import settings\nfrom django import forms\nfrom django.db import models, connection, router\n\n\ndef main():\n    settings.configure(\n        DEBUG=True,\n        SECRET_KEY='test',\n        DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}},\n        INSTALLED_APPS=['myapp'],\n    )\n    django.setup()\n\n    # Import models after setup\n    from myapp.models import Article, FavoriteArticle\n\n    # Create database tables for models\n    with connection.schema_editor() as schema_editor:\n        schema_editor.create_model(Article)\n        schema_editor.create_model(FavoriteArticle)\n\n    # Create an archived article\n    a1 = Article._base_manager.create(title='Visible', archived=False)\n    a2 = Article._base_manager.create(title='Archived', archived=True)\n\n    # Define the form that uses base manager queryset\n    class FavoriteArticleForm(forms.ModelForm):\n        class Meta:\n            model = FavoriteArticle\n            fields = '__all__'\n\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            # Use the base manager to include archived articles\n            self.fields['article'].queryset = Article._base_manager.all()\n\n    # Simulate form submission selecting the archived article\n    form = FavoriteArticleForm(data={'article': a2.pk})\n    print('Form is_valid():', form.is_valid())\n    if not form.is_valid():\n        print('Errors:', form.errors)\n    else:\n        obj = form.save()\n        print('Saved favorite article:', obj)\n\n\nif __name__ == '__main__':\n    main()"
                 }
             ],
             "count": 1
         },
         "django__django-17029": {
-            "tests": [],
-            "count": 0
+            "tests": [
+                {
+                    "path": "/testbed/repro.py",
+                    "code": "from django.apps.registry import apps\n\nprint('Before any call:')\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)\n\nprint('\\nCall get_swappable_settings_name(\"x.y\")')\napps.get_swappable_settings_name('x.y')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('After call cache_info:', info)\n\nprint('\\nCall clear_cache()')\napps.clear_cache()\n\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('After clear_cache cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)"
+                }
+            ],
+            "count": 1
         },
         "django__django-10880": {
             "tests": [],
@@ -22,8 +27,13 @@
             "count": 0
         },
         "django__django-16661": {
-            "tests": [],
-            "count": 0
+            "tests": [
+                {
+                    "path": "/testbed/reproduce.py",
+                    "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.contrib.admin import ModelAdmin\nfrom django.contrib.admin.sites import AdminSite\nfrom django.db import models\n\nclass Country(models.Model):\n    name = models.CharField(max_length=256)\n    class Meta:\n        app_label = 'myapp'\n\nclass Place(models.Model):\n    country = models.ForeignKey(Country, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass Restaurant(models.Model):\n    place = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n    class Meta:\n        app_label = 'myapp'\n\nclass Waiter(models.Model):\n    restaurant = models.ForeignKey(Restaurant, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass WaiterAdmin(ModelAdmin):\n    list_filter = ['restaurant__place__country']\n\nsite = AdminSite()\nma = WaiterAdmin(Waiter, site)\nprint('lookup_allowed:', ma.lookup_allowed('restaurant__place__country', 'test_value'))\n"
+                }
+            ],
+            "count": 1
         },
         "pylint-dev__pylint-7277": {
             "tests": [],
@@ -43,7 +53,7 @@
             "tests": [
                 {
                     "path": "/testbed/test_str_printer.py",
-                    "code": "from sympy import symbols, Eq, Limit, S, sstr\n\nx, y = symbols('\"'\"'x y'\"'\"')\n\n# Test sstr with sympy_integers=True\nprint(sstr(x + S(1)/2, sympy_integers=True))  # Expected: '\"'\"'x + S(1)/2'\"'\"'\nprint(sstr(Eq(x, S(1)/2), sympy_integers=True))  # Expected: '\"'\"'Eq(x, S(1)/2)'\"'\"'\nprint(sstr(Limit(x, x, S(1)/2), sympy_integers=True))  # Expected: '\"'\"'Limit(x, x, S(1)/2)'\"'\"'\n\n# Test python function\nprint(python(Eq(x, y)))  # Expected: '\"'\"'x = Symbol(\\'\"'\"'x\\'\"'\"')\\ny = Symbol(\\'\"'\"'y\\'\"'\"')\\ne = Eq(x, y)'\"'\"'"
+                    "code": "from sympy import symbols, Eq, Limit, S, sstr\n\nx, y = symbols('x y')\n\n# Test sstr with sympy_integers=True\nprint(sstr(x + S(1)/2, sympy_integers=True))  # Expected: 'x + S(1)/2'\nprint(sstr(Eq(x, S(1)/2), sympy_integers=True))  # Expected: 'Eq(x, S(1)/2)'\nprint(sstr(Limit(x, x, S(1)/2), sympy_integers=True))  # Expected: 'Limit(x, x, S(1)/2)'\n\n# Test python function\nfrom sympy.printing.python import python\nprint(python(Eq(x, y)))  # Expected: 'x = Symbol(\\'x\\')\\ny = Symbol(\\'y\\')\\ne = Eq(x, y)'"
                 }
             ],
             "count": 1
@@ -84,7 +94,7 @@
             "tests": [
                 {
                     "path": "/testbed/reproduce_bug.py",
-                    "code": "import numpy as np\nfrom xarray import DataArray\nempty = np.zeros((2,2))\nD1 = DataArray(empty, dims=['\"'\"'dim1'\"'\"', '\"'\"'dim2'\"'\"'],   coords={'\"'\"'dim1'\"'\"':['\"'\"'x'\"'\"', '\"'\"'y'\"'\"'], '\"'\"'dim2'\"'\"':['\"'\"'a'\"'\"', '\"'\"'b'\"'\"']})\nD2 = DataArray(empty, dims=['\"'\"'dim1'\"'\"', '\"'\"'method'\"'\"'], coords={'\"'\"'dim1'\"'\"':['\"'\"'x'\"'\"', '\"'\"'y'\"'\"'], '\"'\"'method'\"'\"':['\"'\"'a'\"'\"', '\"'\"'b'\"'\"']})\n\nprint(D1.loc[dict(dim1='\"'\"'x'\"'\"', dim2='\"'\"'a'\"'\"')])    # should work\nprint(D2.loc[dict(dim1='\"'\"'x'\"'\"', method='\"'\"'a'\"'\"')])  # should fail with ValueError"
+                    "code": "import numpy as np\nfrom xarray import DataArray\nempty = np.zeros((2,2))\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\n\nprint(D1.loc[dict(dim1='x', dim2='a')])    # should work\nprint(D2.loc[dict(dim1='x', method='a')])  # should fail with ValueError"
                 }
             ],
             "count": 1

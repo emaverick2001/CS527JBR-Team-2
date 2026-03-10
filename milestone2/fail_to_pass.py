@@ -3,7 +3,7 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 
-from locate_generated_tests import locate_generated_tests
+from milestone2 import locate_generated_tests
 
 
 SUCCESSFUL_TRAJS = [

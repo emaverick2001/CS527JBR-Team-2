@@ -1,20 +1,52 @@
 {
     "gpt-5-mini": {
-        "django__django-10880": [
-            {
-                "path": "/testbed/reproduce_distinct_case.py",
-                "step": 20,
-                "code": "from django.db.models import Count\nfrom django.db.models.aggregates import Aggregate\n\n# Simulate template rendering\nexpr = 'CASE WHEN 1=1 THEN 1 ELSE 0 END'\nprint('Aggregate.template:', Aggregate.template)\nprint(\"Without trailing space: \")\nprint(Aggregate.template % {'function': 'COUNT', 'distinct': 'DISTINCT', 'expressions': expr})\nprint(\"With trailing space: \")\nprint(Aggregate.template % {'function': 'COUNT', 'distinct': 'DISTINCT ', 'expressions': expr})\n\n# Show what Count.as_sql would set for the distinct part (using internal logic)\nc = Count('id', distinct=True)\n# We can't call c.as_sql without a compiler, but we can inspect that the attribute is set\nprint('\\nCount.distinct attribute:', c.distinct)\n# And simulate the final formatted SQL\nprint('Simulated final SQL:', Aggregate.template % {'function': c.function, 'distinct': ('DISTINCT ' if c.distinct else ''), 'expressions': 'id'})",
-                "method_name": "",
-                "test_class_name": ""
-            }
-        ],
         "django__django-13109": [
             {
                 "path": "/testbed/reproduce_fk_validate.py",
                 "step": 21,
+                "steps": [
+                    21,
+                    22,
+                    32
+                ],
                 "code": "import django\nfrom django.conf import settings\nfrom django import forms\nfrom django.db import models, connection, router\n\n\ndef main():\n    settings.configure(\n        DEBUG=True,\n        SECRET_KEY='test',\n        DATABASES={'default': {'ENGINE': 'django.db.backends.sqlite3', 'NAME': ':memory:'}},\n        INSTALLED_APPS=['myapp'],\n    )\n    django.setup()\n\n    # Import models after setup\n    from myapp.models import Article, FavoriteArticle\n\n    # Create database tables for models\n    with connection.schema_editor() as schema_editor:\n        schema_editor.create_model(Article)\n        schema_editor.create_model(FavoriteArticle)\n\n    # Create an archived article\n    a1 = Article._base_manager.create(title='Visible', archived=False)\n    a2 = Article._base_manager.create(title='Archived', archived=True)\n\n    # Define the form that uses base manager queryset\n    class FavoriteArticleForm(forms.ModelForm):\n        class Meta:\n            model = FavoriteArticle\n            fields = '__all__'\n\n        def __init__(self, *args, **kwargs):\n            super().__init__(*args, **kwargs)\n            # Use the base manager to include archived articles\n            self.fields['article'].queryset = Article._base_manager.all()\n\n    # Simulate form submission selecting the archived article\n    form = FavoriteArticleForm(data={'article': a2.pk})\n    print('Form is_valid():', form.is_valid())\n    if not form.is_valid():\n        print('Errors:', form.errors)\n    else:\n        obj = form.save()\n        print('Saved favorite article:', obj)\n\n\nif __name__ == '__main__':\n    main()",
                 "method_name": "main",
+                "test_class_name": ""
+            }
+        ],
+        "django__django-17029": [
+            {
+                "path": "/testbed/repro.py",
+                "step": 6,
+                "steps": [
+                    6
+                ],
+                "code": "from django.apps.registry import apps\n\nprint('Before any call:')\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)\n\nprint('\\nCall get_swappable_settings_name(\"x.y\")')\napps.get_swappable_settings_name('x.y')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('After call cache_info:', info)\n\nprint('\\nCall clear_cache()')\napps.clear_cache()\n\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('After clear_cache cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)",
+                "method_name": "",
+                "test_class_name": ""
+            },
+            {
+                "path": "/testbed/repro2.py",
+                "step": 14,
+                "steps": [
+                    14
+                ],
+                "code": "from django.apps.registry import apps\n\n# Ensure registry populated (with no apps)\napps.populate([])\n\nprint('ready:', apps.ready)\n\n# Call and populate cache\napps.get_swappable_settings_name('auth.user')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('cache before clear:', info)\n\n# Call clear_cache\napps.clear_cache()\n\ninfo2 = apps.get_swappable_settings_name.cache_info()\nprint('cache after clear:', info2)\n\n# Confirm cache cleared: currsize should be 0\nprint('cleared:', info2.currsize == 0)",
+                "method_name": "",
+                "test_class_name": ""
+            }
+        ],
+        "django__django-10880": [
+            {
+                "path": "/testbed/reproduce_distinct_case.py",
+                "step": 20,
+                "steps": [
+                    20,
+                    21,
+                    23
+                ],
+                "code": "from django.db.models import Count\nfrom django.db.models.aggregates import Aggregate\n\n# Simulate template rendering\nexpr = 'CASE WHEN 1=1 THEN 1 ELSE 0 END'\nprint('Aggregate.template:', Aggregate.template)\nprint(\"Without trailing space: \")\nprint(Aggregate.template % {'function': 'COUNT', 'distinct': 'DISTINCT', 'expressions': expr})\nprint(\"With trailing space: \")\nprint(Aggregate.template % {'function': 'COUNT', 'distinct': 'DISTINCT ', 'expressions': expr})\n\n# Show what Count.as_sql would set for the distinct part (using internal logic)\nc = Count('id', distinct=True)\n# We can't call c.as_sql without a compiler, but we can inspect that the attribute is set\nprint('\\nCount.distinct attribute:', c.distinct)\n# And simulate the final formatted SQL\nprint('Simulated final SQL:', Aggregate.template % {'function': c.function, 'distinct': ('DISTINCT ' if c.distinct else ''), 'expressions': 'id'})",
+                "method_name": "",
                 "test_class_name": ""
             }
         ],
@@ -22,6 +54,9 @@
             {
                 "path": "/testbed/repro.py",
                 "step": 18,
+                "steps": [
+                    18
+                ],
                 "code": "import sys\nfrom types import SimpleNamespace\nfrom django.utils import autoreload\n\nprint('sys.argv:', sys.argv)\nprint('__main__ in sys.modules:', '__main__' in sys.modules)\nmain = sys.modules['__main__']\n# Simulate running as `python -m pkg_other_than_django`\nmain.__spec__ = SimpleNamespace(parent='pkg_other_than_django')\nargs = autoreload.get_child_arguments()\nprint('get_child_arguments ->', args)",
                 "method_name": "",
                 "test_class_name": ""
@@ -30,60 +65,74 @@
         "django__django-16661": [
             {
                 "path": "/testbed/reproduce.py",
-                "step": 29,
+                "step": 8,
+                "steps": [
+                    8,
+                    29,
+                    31,
+                    33,
+                    41
+                ],
                 "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.contrib.admin import ModelAdmin\nfrom django.contrib.admin.sites import AdminSite\nfrom django.db import models\n\nclass Country(models.Model):\n    name = models.CharField(max_length=256)\n    class Meta:\n        app_label = 'myapp'\n\nclass Place(models.Model):\n    country = models.ForeignKey(Country, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass Restaurant(models.Model):\n    place = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n    class Meta:\n        app_label = 'myapp'\n\nclass Waiter(models.Model):\n    restaurant = models.ForeignKey(Restaurant, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass WaiterAdmin(ModelAdmin):\n    list_filter = ['restaurant__place__country']\n\nsite = AdminSite()\nma = WaiterAdmin(Waiter, site)\nprint('lookup_allowed:', ma.lookup_allowed('restaurant__place__country', 'test_value'))\n",
-                "method_name": "",
+                "method_name": "run",
                 "test_class_name": ""
             },
             {
                 "path": "/testbed/run_single_test.py",
-                "step": 47,
+                "step": 44,
+                "steps": [
+                    44,
+                    47
+                ],
                 "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n        \"tests\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.core.management import call_command\n\ncall_command('test', 'tests.modeladmin.ModelAdminTests.test_lookup_allowed_onetoone', verbosity=2)\n",
-                "method_name": "",
-                "test_class_name": ""
+                "method_name": "test_lookup_allowed_onetoone",
+                "test_class_name": "ModelAdminTests"
             },
             {
                 "path": "/testbed/reproduce_onetoone.py",
                 "step": 50,
+                "steps": [
+                    50,
+                    52
+                ],
                 "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.contrib.admin import ModelAdmin\nfrom django.contrib.admin.sites import AdminSite\nfrom django.db import models\n\nclass Department(models.Model):\n    code = models.CharField(max_length=4, unique=True)\n    class Meta:\n        app_label = 'myapp'\n\nclass Employee(models.Model):\n    department = models.ForeignKey(Department, models.CASCADE, to_field='code')\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeProfile(models.Model):\n    employee = models.OneToOneField(Employee, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeInfo(models.Model):\n    employee = models.OneToOneField(Employee, models.CASCADE)\n    description = models.CharField(max_length=100)\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeProfileAdmin(ModelAdmin):\n    list_filter = [\n        'employee__employeeinfo__description',\n        'employee__department__code',\n    ]\n\nsite = AdminSite()\nma = EmployeeProfileAdmin(EmployeeProfile, site)\nprint('lookup_allowed employeeinfo description:', ma.lookup_allowed('employee__employeeinfo__description', 'test_value'))\nprint('lookup_allowed department code:', ma.lookup_allowed('employee__department__code', 'test_value'))",
-                "method_name": "",
-                "test_class_name": ""
-            },
-            {
-                "path": "/testbed/test_urls.py",
-                "step": 54,
-                "code": "from django.urls import path\nurlpatterns = []",
                 "method_name": "",
                 "test_class_name": ""
             },
             {
                 "path": "/testbed/run_pr_test.py",
                 "step": 56,
+                "steps": [
+                    56,
+                    61,
+                    63,
+                    65,
+                    67,
+                    75
+                ],
                 "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n        \"tests\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[\n        'django.contrib.sessions.middleware.SessionMiddleware',\n        'django.contrib.auth.middleware.AuthenticationMiddleware',\n        'django.contrib.messages.middleware.MessageMiddleware',\n    ],\n    ROOT_URLCONF=\"test_urls\",\n    TEMPLATES=[\n        {\n            'BACKEND': 'django.template.backends.django.DjangoTemplates',\n            'DIRS': [],\n            'APP_DIRS': True,\n            'OPTIONS': {'context_processors': ['django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages', 'django.template.context_processors.request']},\n        }\n    ],\n)\n\n\n# minimal urlconf file\nwith open('test_urls.py', 'w') as f:\n    f.write(\"from django.urls import path\\nurlpatterns = []\\n\")\n\ndjango.setup()\nfrom django.core.management import call_command\n\n# Run the specific test that was described in the PR\ncall_command('test', 'tests.modeladmin', verbosity=2)\n\n",
-                "method_name": "",
-                "test_class_name": ""
-            }
-        ],
-        "django__django-17029": [
-            {
-                "path": "/testbed/repro.py",
-                "step": 6,
-                "code": "from django.apps.registry import apps\n\nprint('Before any call:')\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)\n\nprint('\\nCall get_swappable_settings_name(\"x.y\")')\napps.get_swappable_settings_name('x.y')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('After call cache_info:', info)\n\nprint('\\nCall clear_cache()')\napps.clear_cache()\n\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('After clear_cache cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)",
-                "method_name": "",
-                "test_class_name": ""
+                "method_name": "test_lookup_allowed_foreign_primary",
+                "test_class_name": "ModelAdminTests"
             },
             {
-                "path": "/testbed/repro2.py",
-                "step": 14,
-                "code": "from django.apps.registry import apps\n\n# Ensure registry populated (with no apps)\napps.populate([])\n\nprint('ready:', apps.ready)\n\n# Call and populate cache\napps.get_swappable_settings_name('auth.user')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('cache before clear:', info)\n\n# Call clear_cache\napps.clear_cache()\n\ninfo2 = apps.get_swappable_settings_name.cache_info()\nprint('cache after clear:', info2)\n\n# Confirm cache cleared: currsize should be 0\nprint('cleared:', info2.currsize == 0)",
-                "method_name": "",
-                "test_class_name": ""
+                "path": "/testbed/run_check.py",
+                "step": 81,
+                "steps": [
+                    81,
+                    84
+                ],
+                "code": "import django, os, sys\nfrom django.conf import settings\n\nBASE_DIR = os.path.abspath(os.path.dirname(__file__))\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n        \"tests\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[\n        'django.contrib.sessions.middleware.SessionMiddleware',\n        'django.contrib.auth.middleware.AuthenticationMiddleware',\n        'django.contrib.messages.middleware.MessageMiddleware',\n    ],\n    ROOT_URLCONF='test_urls',\n    TEMPLATES=[\n        {\n            'BACKEND': 'django.template.backends.django.DjangoTemplates',\n            'DIRS': [],\n            'APP_DIRS': True,\n            'OPTIONS': {\n                'context_processors': [\n                    'django.contrib.auth.context_processors.auth',\n                    'django.contrib.messages.context_processors.messages',\n                    'django.template.context_processors.request',\n                ]\n            },\n        }\n    ],\n)\n\n# write minimal urlconf\nwith open(os.path.join(BASE_DIR, 'test_urls.py'), 'w') as f:\n    f.write(\"from django.urls import path\\nurlpatterns = []\\n\")\n\ndjango.setup()\nfrom django.core.management import call_command\n\n# Run the specific test\ncall_command('test', 'tests.modeladmin.ModelAdminTests.test_lookup_allowed_foreign_primary', verbosity=2)\n\n",
+                "method_name": "test_lookup_allowed_foreign_primary",
+                "test_class_name": "ModelAdminTests"
             }
         ],
         "pylint-dev__pylint-7277": [
             {
                 "path": "/testbed/repro.py",
                 "step": 8,
+                "steps": [
+                    8
+                ],
                 "code": "import sys\nimport runpy\n\nsys.path.insert(0, \"something\")\nprint('before:', sys.path[:4])\nrunpy.run_module('pylint', run_name='__main__', alter_sys=True)\nprint('after:', sys.path[:4])",
                 "method_name": "",
                 "test_class_name": ""
@@ -91,6 +140,9 @@
             {
                 "path": "/testbed/repro2.py",
                 "step": 15,
+                "steps": [
+                    15
+                ],
                 "code": "import sys\nimport runpy\n\nsys.path.insert(0, \"something\")\nprint('before:', sys.path[:6])\ntry:\n    runpy.run_module('pylint', run_name='__main__', alter_sys=True)\nexcept SystemExit:\n    print('pylint exited')\nprint('after:', sys.path[:6])",
                 "method_name": "",
                 "test_class_name": ""
@@ -100,6 +152,10 @@
             {
                 "path": "/testbed/reproduce.py",
                 "step": 13,
+                "steps": [
+                    13,
+                    14
+                ],
                 "code": "import os\nimport sys\nfrom sphinx.application import Sphinx\n\n# use local directory\nsrcdir = os.path.join(os.path.dirname(__file__), 'repro_src')\noutdir = os.path.join(os.path.dirname(__file__), 'repro_build')\nif os.path.exists(outdir):\n    import shutil\n    shutil.rmtree(outdir)\nif os.path.exists(srcdir):\n    import shutil\n    shutil.rmtree(srcdir)\nos.makedirs(srcdir)\n\n# create conf.py\nwith open(os.path.join(srcdir, 'conf.py'), 'w') as f:\n    f.write(\"\"\"\nimport sys, os\nsys.path.insert(0, os.path.abspath('.'))\nextensions = ['my_extension']\n\"\"\")\n\n# create index.rst\nwith open(os.path.join(srcdir, 'index.rst'), 'w') as f:\n    f.write(\"\"\"\nThis is a test\n===============\n\n.. include:: something-to-include.rst\n\n&REPLACE_ME;\n\"\"\")\n\n# create something-to-include.rst\nwith open(os.path.join(srcdir, 'something-to-include.rst'), 'w') as f:\n    f.write(\"\"\"\nTesting\n=======\n\n&REPLACE_ME;\n\"\"\")\n\n# create extension\nwith open(os.path.join(srcdir, 'my_extension.py'), 'w') as f:\n    f.write(\"\"\"\nfrom sphinx.application import Sphinx\n\ndef subst_vars_replace(app: Sphinx, docname, source):\n    print('EVENT CALLED docname=', docname)\n    print('BEFORE:', repr(source[0][:100]))\n    result = source[0]\n    result = result.replace(\"&REPLACE_ME;\", \"REPLACED\")\n    source[0] = result\n    print('AFTER :', repr(source[0][:100]))\n\n\ndef setup(app: Sphinx):\n    app.connect('source-read', subst_vars_replace)\n    return dict(version='1.0')\n\"\"\")\n\n# build\napp = Sphinx(srcdir, srcdir, outdir, outdir, buildername='html')\napp.build()\n\nprint('\\n----- Build output:')\nfor root, dirs, files in os.walk(outdir):\n    for name in files:\n        if name.endswith('.html'):\n            path = os.path.join(root, name)\n            print(path)\n            print(open(path, 'r', encoding='utf-8').read())\n\nprint('\\nDone')\n",
                 "method_name": "",
                 "test_class_name": ""
@@ -107,10 +163,60 @@
         ]
     },
     "deepseek-v3": {
+        "sphinx-doc__sphinx-9281": [
+            {
+                "path": "/testbed/enum_test.py",
+                "step": 11,
+                "steps": [
+                    11
+                ],
+                "code": "from enum import Enum\nclass MyEnum(Enum):\n    ValueA = 10\n    ValueB = 20\n\ndef ugly_enum_func(e: MyEnum = MyEnum.ValueA) -> None:\n    pass\n\nprint(ugly_enum_func.__annotations__)\nprint(ugly_enum_func.__kwdefaults__)",
+                "method_name": "",
+                "test_class_name": ""
+            },
+            {
+                "path": "/testbed/enum_test2.py",
+                "step": 13,
+                "steps": [
+                    13
+                ],
+                "code": "import enum\nfrom inspect import signature\nfrom sphinx.util.inspect import object_description\n\nclass MyEnum(enum.Enum):\n    ValueA = 10\n    ValueB = 20\n\ndef ugly_enum_func(e: MyEnum = MyEnum.ValueA) -> None:\n    pass\n\nsig = signature(ugly_enum_func)\nparam = sig.parameters['e']\nprint(f'Default value: {param.default}')\nprint(f'Default value description: {object_description(param.default)}')",
+                "method_name": "",
+                "test_class_name": ""
+            }
+        ],
+        "sympy__sympy-14531": [
+            {
+                "path": "/testbed/test_str_printer.py",
+                "step": 4,
+                "steps": [
+                    4,
+                    13
+                ],
+                "code": "from sympy import symbols, Eq, Limit, S, sstr\n\nx, y = symbols('x y')\n\n# Test sstr with sympy_integers=True\nprint(sstr(x + S(1)/2, sympy_integers=True))  # Expected: 'x + S(1)/2'\nprint(sstr(Eq(x, S(1)/2), sympy_integers=True))  # Expected: 'Eq(x, S(1)/2)'\nprint(sstr(Limit(x, x, S(1)/2), sympy_integers=True))  # Expected: 'Limit(x, x, S(1)/2)'\n\n# Test python function\nfrom sympy.printing.python import python\nprint(python(Eq(x, y)))  # Expected: 'x = Symbol(\\'x\\')\\ny = Symbol(\\'y\\')\\ne = Eq(x, y)'",
+                "method_name": "",
+                "test_class_name": ""
+            }
+        ],
+        "sympy__sympy-24539": [
+            {
+                "path": "/testbed/reproduce_as_expr.py",
+                "step": 2,
+                "steps": [
+                    2
+                ],
+                "code": "from sympy import ring, ZZ, symbols\n\nR, x, y, z = ring(\"x,y,z\", ZZ)\nf = 3*x**2*y - x*y*z + 7*z**3 + 1\nU, V, W = symbols(\"u,v,w\")\nprint(f.as_expr(U, V, W))",
+                "method_name": "",
+                "test_class_name": ""
+            }
+        ],
         "astropy__astropy-13033": [
             {
                 "path": "/testbed/reproduce_error.py",
                 "step": 5,
+                "steps": [
+                    5
+                ],
                 "code": "from astropy.time import Time\nfrom astropy.timeseries import TimeSeries\nimport numpy as np\n\ntime = Time(np.arange(100000, 100003), format='jd')\nts = TimeSeries(time=time, data={\"flux\": [99.9, 99.8, 99.7]})\nts._required_columns = [\"time\", \"flux\"]\nts.remove_column(\"flux\")",
                 "method_name": "",
                 "test_class_name": ""
@@ -124,6 +230,9 @@
             {
                 "path": "/testbed/reproduce_error.py",
                 "step": 1,
+                "steps": [
+                    1
+                ],
                 "code": "from django.db.models import Q, Count\nfrom property.models import PropertyGroup, ManagementAgent\n\n# Example usage to reproduce the error\ndef reproduce_error():\n    management_agent = ManagementAgent.objects.first()  # Replace with actual logic to get an agent\n    property_groups = PropertyGroup.objects.agent_groups(management_agent)\n    queryset = ManagementAgent.objects.annotate(Count(\"property_groups\"))\n    try:\n        queryset.filter(\n            Q(property_groups__in=property_groups)\n            | Q(property_groups__count=0)\n        ).distinct()\n        print(\"Query executed successfully.\")\n    except Exception as e:\n        print(f\"Error: {e}\")\n\nif __name__ == \"__main__\":\n    reproduce_error()",
                 "method_name": "reproduce_error",
                 "test_class_name": ""
@@ -134,6 +243,9 @@
             {
                 "path": "/testbed/reproduce_bug.py",
                 "step": 1,
+                "steps": [
+                    1
+                ],
                 "code": "import numpy as np\nfrom xarray import DataArray\nempty = np.zeros((2,2))\nD1 = DataArray(empty, dims=['dim1', 'dim2'],   coords={'dim1':['x', 'y'], 'dim2':['a', 'b']})\nD2 = DataArray(empty, dims=['dim1', 'method'], coords={'dim1':['x', 'y'], 'method':['a', 'b']})\n\nprint(D1.loc[dict(dim1='x', dim2='a')])    # should work\nprint(D2.loc[dict(dim1='x', method='a')])  # should fail with ValueError",
                 "method_name": "",
                 "test_class_name": ""
@@ -143,25 +255,13 @@
             {
                 "path": "/testbed/reproduce_error.py",
                 "step": 2,
-                "code": "",
-                "method_name": "",
-                "test_class_name": ""
-            }
-        ],
-        "sphinx-doc__sphinx-9281": [
-            {
-                "path": "/testbed/enum_test.py",
-                "step": 11,
-                "code": "from enum import Enum\nclass MyEnum(Enum):\n    ValueA = 10\n    ValueB = 20\n\ndef ugly_enum_func(e: MyEnum = MyEnum.ValueA) -> None:\n    pass\n\nprint(ugly_enum_func.__annotations__)\nprint(ugly_enum_func.__kwdefaults__)",
-                "method_name": "",
-                "test_class_name": ""
-            }
-        ],
-        "sympy__sympy-14531": [
-            {
-                "path": "/testbed/test_str_printer.py",
-                "step": 4,
-                "code": "from sympy import symbols, Eq, Limit, S, sstr\n\nx, y = symbols('x y')\n\n# Test sstr with sympy_integers=True\nprint(sstr(x + S(1)/2, sympy_integers=True))  # Expected: 'x + S(1)/2'\nprint(sstr(Eq(x, S(1)/2), sympy_integers=True))  # Expected: 'Eq(x, S(1)/2)'\nprint(sstr(Limit(x, x, S(1)/2), sympy_integers=True))  # Expected: 'Limit(x, x, S(1)/2)'\n\n# Test python function\nfrom sympy.printing.python import python\nprint(python(Eq(x, y)))  # Expected: 'x = Symbol(\\'x\\')\\ny = Symbol(\\'y\\')\\ne = Eq(x, y)'",
+                "steps": [
+                    2,
+                    4,
+                    8,
+                    10
+                ],
+                "code": "import sys\nimport runpy\n\nprint(\"Before running pylint:\", sys.path)\nsys.path.insert(0, \"something\")\nprint(\"After inserting path:\", sys.path)\n\ntry:\n    runpy.run_module('pylint', run_name=\"__main__\", alter_sys=True)\nexcept SystemExit:\n    pass  # Ignore pylint's SystemExit\n\nprint(\"After running pylint:\", sys.path)",
                 "method_name": "",
                 "test_class_name": ""
             }
@@ -170,16 +270,10 @@
             {
                 "path": "/testbed/reproduce_error.py",
                 "step": 3,
+                "steps": [
+                    3
+                ],
                 "code": "from sympy.combinatorics import *\nfrom sympy.combinatorics.homomorphisms import homomorphism\nD3 = DihedralGroup(3)\nT = homomorphism(D3, D3, D3.generators, D3.generators)",
-                "method_name": "",
-                "test_class_name": ""
-            }
-        ],
-        "sympy__sympy-24539": [
-            {
-                "path": "/testbed/reproduce_as_expr.py",
-                "step": 2,
-                "code": "from sympy import ring, ZZ, symbols\n\nR, x, y, z = ring(\"x,y,z\", ZZ)\nf = 3*x**2*y - x*y*z + 7*z**3 + 1\nU, V, W = symbols(\"u,v,w\")\nprint(f.as_expr(U, V, W))",
                 "method_name": "",
                 "test_class_name": ""
             }
