@@ -1,488 +1,298 @@
-import json
-import os
 import re
-import shlex
-import glob
-from typing import Any, Dict, List, Optional, Tuple
-
-# =========================
-# Bullet-proof paths (works no matter where you run from)
-# =========================
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))      # .../milestone2
-REPO_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))  # repo root
-TRAJ_ROOT = os.path.join(REPO_ROOT, "Trajectories")        # .../Trajectories
+import json
+import matplotlib.pyplot as plt
+import numpy as np
 
 
-# =========================
-# Task 3: locate_generated_tests
-# =========================
-
-def _strip_testbed_prefix(path: str) -> str:
-    # IMPORTANT: /testbed contains "test" but it's not a tests/ directory.
-    return path[8:] if path.startswith("/testbed/") else path
-
-
-# ---- Path heuristics ----
-_TEST_DIR_PAT = re.compile(r"(^|/)(tests?|testing)(/|$)", re.IGNORECASE)
-_TEST_FILE_PAT = re.compile(r"(^|/)(test_[^/]+\.\w+|[^/]+_test\.\w+)$", re.IGNORECASE)
-_REPRO_VALIDATE_PAT = re.compile(
-    r"(^|/)[^/]*(repro|reproduce|validate|regression)[^/]*\.\w+$",
-    re.IGNORECASE,
-)
-
-# ---- Thought / response heuristics ----
-_THOUGHT_PATS = [
-    re.compile(r"\brepro(duce)?\b", re.IGNORECASE),
-    re.compile(r"\bvalidate\b", re.IGNORECASE),
-    re.compile(r"\bregression\b", re.IGNORECASE),
-    re.compile(r"\b(write|add|create|generate)\b.*\btest\b", re.IGNORECASE),
-    re.compile(r"\bunit\s+test\b", re.IGNORECASE),
-    re.compile(r"\bpytest\b", re.IGNORECASE),
-    re.compile(r"\bunittest\b", re.IGNORECASE),
+# Instance lists
+GPT_INSTANCES = [
+    'django__django-13109',
+    'django__django-17029',
+    'django__django-10880',
+    'django__django-13837',
+    'django__django-16661',
+    'pylint-dev__pylint-7277',
+    'sphinx-doc__sphinx-11510',
 ]
 
-# ---- Code heuristics ----
-_CODE_PATS = [
-    re.compile(r"^\s*def\s+test_", re.MULTILINE),
-    re.compile(r"\bpytest\b", re.IGNORECASE),
-    re.compile(r"\bunittest\b", re.IGNORECASE),
-    re.compile(r"\bTestCase\b"),
-    re.compile(r"\bassert\b"),
+DEEPSEEK_INSTANCES = [
+    'sphinx-doc__sphinx-9281',
+    'sympy__sympy-14531',
+    'sympy__sympy-24539',
+    'astropy__astropy-13033',
+    'django__django-11138',
+    'django__django-11141',
+    'django__django-11211',
+    'django__django-12308',
+    'django__django-14351',
+    'django__django-15268',
+    'pydata__xarray-4695',
+    'pylint-dev__pylint-7277',
+    'sympy__sympy-24443',
 ]
 
-# ---- Optional name extraction ----
-_CLASS_RE = re.compile(r"^\s*class\s+([A-Za-z_]\w*)\b", re.MULTILINE)
-_DEF_RE = re.compile(r"^\s*def\s+([A-Za-z_]\w*)\b", re.MULTILINE)
+# Successful trajectories (from milestone1 classification)
+SUCCESSFUL_TRAJS = [
+    ('gpt-5-mini', 'django__django-13109'),
+    ('gpt-5-mini', 'django__django-17029'),
+    ('deepseek-v3', 'sphinx-doc__sphinx-9281'),
+    ('deepseek-v3', 'sympy__sympy-14531'),
+    ('deepseek-v3', 'sympy__sympy-24539'),
+]
 
-# Stricter "test class" detection
-_TESTLIKE_CLASS_NAME = re.compile(r"^(Test\w+|\w*Tests?)$")
-_TESTCASE_INHERIT = re.compile(
-    r"^\s*class\s+([A-Za-z_]\w*)\s*\(([^)]*TestCase[^)]*)\)\s*:",
-    re.MULTILINE
-)
+UNSUCCESSFUL_TRAJS = [
+    ('deepseek-v3', 'astropy__astropy-13033'),
+    ('deepseek-v3', 'django__django-11138'),
+    ('deepseek-v3', 'django__django-11141'),
+    ('deepseek-v3', 'django__django-11211'),
+    ('deepseek-v3', 'django__django-12308'),
+    ('deepseek-v3', 'django__django-14351'),
+    ('deepseek-v3', 'django__django-15268'),
+    ('deepseek-v3', 'pydata__xarray-4695'),
+    ('deepseek-v3', 'pylint-dev__pylint-7277'),
+    ('deepseek-v3', 'sympy__sympy-24443'),
+    ('gpt-5-mini', 'django__django-10880'),
+    ('gpt-5-mini', 'django__django-13837'),
+    ('gpt-5-mini', 'django__django-16661'),
+    ('gpt-5-mini', 'pylint-dev__pylint-7277'),
+    ('gpt-5-mini', 'sphinx-doc__sphinx-11510'),
+]
 
+# Keywords that indicate a test/reproduce file
+TEST_KEYWORDS = ['test', 'reproduce', 'debug', 'validate', 'fix']
 
-def _path_is_testish(path: str) -> bool:
-    p = _strip_testbed_prefix(path or "")
-    return bool(_TEST_DIR_PAT.search(p) or _TEST_FILE_PAT.search(p) or _REPRO_VALIDATE_PAT.search(p))
-
-
-def _thought_is_testish(text: str) -> bool:
-    if not text:
-        return False
-    # Remove /testbed/... fragments so "testbed" doesn't accidentally trigger logic.
-    cleaned = re.sub(r"/testbed[^\s]*", " ", text)
-    return any(p.search(cleaned) for p in _THOUGHT_PATS)
-
-
-def _code_is_testish(code: str) -> bool:
-    if not code:
-        return False
-    return any(p.search(code) for p in _CODE_PATS)
-
-
-def _infer_names_for_artifact(path: str, code: str) -> Tuple[str, str]:
-    """
-    Returns (method_name, test_class_name) (both optional).
-    - For real test files: prefer def test_* and class Test*/Tests/TestCase
-    - For repro/validate scripts: prefer def reproduce_* / validate_* / main
-    - Never label random domain classes as test_class_name
-    """
-    if not code:
-        return "", ""
-
-    path_lower = (path or "").lower()
-    defs = _DEF_RE.findall(code)
-    classes = _CLASS_RE.findall(code)
-
-    def pick_def(prefixes: List[str]) -> str:
-        for d in defs:
-            for p in prefixes:
-                if d.startswith(p):
-                    return d
-        return ""
-
-    def pick_test_class() -> str:
-        m = _TESTCASE_INHERIT.search(code)
-        if m:
-            return m.group(1)
-        for c in classes:
-            if _TESTLIKE_CLASS_NAME.match(c):
-                return c
-        return ""
-
-    is_real_test_file = (
-        "/tests/" in path_lower
-        or (path_lower.endswith(".py") and ("/test_" in path_lower or path_lower.endswith("_test.py")))
-    )
-    is_repro_script = any(k in path_lower for k in ["repro", "reproduce", "validate", "regression"])
-
-    if is_real_test_file:
-        return pick_def(["test_"]), pick_test_class()
-
-    if is_repro_script:
-        return pick_def(["reproduce", "repro", "validate", "main"]), pick_test_class()
-
-    return pick_def(["test_"]), pick_test_class()
+# Keywords that indicate failure in observation
+FAILURE_KEYWORDS = ['Traceback', ' Error', 'FAILED']
 
 
-# =========================
-# Parsing helpers
-# =========================
+def count_tool_use(model_name: str, instance_id: str) -> dict:
+    tools_to_search = ["view", "create", "str_replace", "insert", "undo_edit"]
+    with open(f'../Trajectories/{model_name}/{instance_id}.traj', 'r') as f:
+        trajectory = json.load(f)
 
-def _parse_str_replace_editor_cli(action: str) -> Optional[Tuple[str, str, Dict[str, str]]]:
-    """
-    Parses:
-      str_replace_editor create PATH --file_text '...'
-      str_replace_editor str_replace PATH --old_str '...' --new_str '...'
-      str_replace_editor insert PATH --insert_text '...'
-      str_replace_editor view PATH --view_range ...
-    """
-    try:
-        toks = shlex.split(action)
-    except Exception:
-        return None
-    if len(toks) < 2 or toks[0] != "str_replace_editor":
-        return None
+    trajectory_steps = trajectory['trajectory']
+    tool_use_count = {tool: 0 for tool in tools_to_search}
+    pattern_string = r"str_replace_editor\s+(" + \
+        "|".join(map(re.escape, tools_to_search)) + r")"
+    for step in range(len(trajectory_steps)):
+        actions = trajectory_steps[step]['action']
+        matches = re.findall(pattern_string, actions)
+        for match in matches:
+            tool_use_count[match] += 1
 
-    subcmd = toks[1]
-    path = toks[2] if len(toks) > 2 else ""
-    args: Dict[str, str] = {}
-
-    i = 3
-    while i < len(toks):
-        tok = toks[i]
-        if tok.startswith("--"):
-            key = tok[2:]
-            val = toks[i + 1] if i + 1 < len(toks) else ""
-            args[key] = val
-            i += 2
-        else:
-            i += 1
-
-    return subcmd, path, args
+    return tool_use_count
 
 
-def _parse_str_replace_editor_json(action: str) -> Optional[Tuple[str, str, Dict[str, Any]]]:
-    """
-    Parses (if it ever appears):
-      str_replace_editor create
-      { "path": "...", "file_text": "..." }
-    """
-    if not action.startswith("str_replace_editor") or "\n" not in action:
-        return None
-    first, rest = action.split("\n", 1)
-    parts = first.split()
-    if len(parts) < 2:
-        return None
-    subcmd = parts[1]
-    try:
-        payload = json.loads(rest.strip())
-    except Exception:
-        return None
-    path = payload.get("path", "") if isinstance(payload, dict) else ""
-    return subcmd, path, payload
+def locate_navigation(model_name: str, instance_id: str) -> list:
+    file_name = f"../Trajectories/{model_name}/{instance_id}.traj"
+    with open(file_name, 'r') as f:
+        traj_data = f.read()
 
+    nav_commands = {
+        "find_file", "search_file", "search_dir",
+        "ls", "cat", "pwd", "find", "grep", "cd", "sed",
+    }
+    steps = []
 
-def _extract_editor_code(subcmd: str, args: Dict[str, Any]) -> str:
-    if not isinstance(args, dict):
-        return ""
-    if subcmd == "create":
-        return args.get("file_text") or args.get("content") or args.get("text") or ""
-    if subcmd == "str_replace":
-        return args.get("new_str") or args.get("replacement") or ""
-    if subcmd == "insert":
-        return args.get("insert_text") or args.get("text") or args.get("new_str") or ""
-    return ""
+    traj = json.loads(traj_data)
+    trajectory = traj.get("trajectory", [])
+    for idx, step in enumerate(trajectory, start=1):
+        action = step.get("action")
+        if not action:
+            continue
+        parts = action.split()
+        if not parts:
+            continue
+        cmd = parts[0]
+        if cmd == "str_replace_editor":
+            if len(parts) > 1 and parts[1] == "view":
+                steps.append(idx)
+            continue
+        if cmd in nav_commands:
+            steps.append(idx)
+    return steps
 
-
-def _parse_view_observation_to_text(observation: str) -> Optional[str]:
-    """
-    Observations often include:
-      Here's the result of running `cat -n` on /path:
-       1\tline
-       2\tline
-    We reconstruct file content by removing the line numbers.
-    """
-    if not observation:
-        return None
-    if "Here's the result of running `cat -n` on " not in observation:
-        return None
-    if "on a snippet of" in observation:
-        return None  # partial view; ignore
-
-    lines = observation.splitlines()
-    content: List[str] = []
-    for line in lines[1:]:
-        if "\t" in line:
-            _, rest = line.split("\t", 1)
-            content.append(rest)
-    return "\n".join(content)
-
-
-def _parse_echo_or_printf_redirect(action: str) -> Optional[Tuple[str, str]]:
-    """
-    Handles:
-      echo "..." > /path/file.py
-      echo "..." > /path/file.py && python /path/file.py
-      printf "..." > /path/file.py && ...
-    Returns (path, content).
-    """
-    stripped = action.strip()
-    if not (stripped.startswith("echo ") or stripped.startswith("printf ")):
-        return None
-
-    try:
-        toks = shlex.split(action)
-    except Exception:
-        return None
-
-    if ">" not in toks:
-        return None
-
-    gt = toks.index(">")
-    if gt >= len(toks) - 1:
-        return None
-
-    path = toks[gt + 1]
-
-    # content tokens are between command and '>'
-    cmd = toks[0]
-    content_tokens = toks[1:gt]
-
-    # strip common flags (-e/-n) for echo
-    if cmd == "echo" and content_tokens and content_tokens[0] in ("-e", "-n"):
-        content_tokens = content_tokens[1:]
-
-    content = " ".join(content_tokens)
-    return path, content
-
-
-_HEREDOC_1 = re.compile(r"cat\s+<<\s*['\"]?([A-Za-z0-9_]+)['\"]?\s*>\s*(\S+)", re.IGNORECASE)
-_HEREDOC_2 = re.compile(r"cat\s*>\s*(\S+)\s*<<\s*['\"]?([A-Za-z0-9_]+)['\"]?", re.IGNORECASE)
-
-def _parse_cat_heredoc(action: str) -> Optional[Tuple[str, str]]:
-    """
-    Best-effort heredoc parse:
-      cat <<'EOF' > /path/file.py
-      ...lines...
-      EOF
-    or:
-      cat > /path/file.py <<'EOF'
-      ...lines...
-      EOF
-    """
-    if "cat" not in action or "<<" not in action or ">" not in action:
-        return None
-
-    m = _HEREDOC_1.search(action) or _HEREDOC_2.search(action)
-    if not m:
-        return None
-
-    if m.re is _HEREDOC_1:
-        delim = m.group(1)
-        path = m.group(2)
-    else:
-        path = m.group(1)
-        delim = m.group(2)
-
-    # heredoc body starts after first newline
-    if "\n" not in action:
-        return None
-
-    first_line, rest = action.split("\n", 1)
-    body_lines = []
-    for line in rest.splitlines():
-        if line.strip() == delim:
-            break
-        body_lines.append(line)
-
-    return path, "\n".join(body_lines)
-
-
-# =========================
-# Main required function
-# =========================
 
 def locate_generated_tests(model_name: str, instance_id: str) -> list:
-    """
-    Task 3:
-    Return a list[dict] for each generated test artifact (usually one per file path).
-    """
-    file_name = os.path.join(TRAJ_ROOT, model_name, f"{instance_id}.traj")
-    with open(file_name, "r") as f:
-        traj = json.loads(f.read())
+    with open(f'../Trajectories/{model_name}/{instance_id}.traj', 'r') as f:
+        trajectory = json.load(f)
 
-    trajectory = traj.get("trajectory", [])
+    steps = trajectory.get('trajectory', [])
+    results = []
 
-    # Best-effort file state
-    file_state: Dict[str, str] = {}
+    # Regex: str_replace_editor create <path> --file_text <content>
+    create_pattern = re.compile(
+        r'str_replace_editor\s+create\s+(\S+)\s+--file_text\s+(.+)',
+        re.DOTALL
+    )
 
-    # One output record per path; keep earliest step but update code as it changes
-    records: Dict[str, Dict[str, Any]] = {}
-
-    for idx, step in enumerate(trajectory, start=1):
-        action = step.get("action") or ""
-        observation = step.get("observation") or ""
-        thought_blob = (step.get("thought") or "") + "\n" + (step.get("response") or "")
-
-        # 0) track full content from view (helps reconstruct final full code)
-        if action.startswith("str_replace_editor view"):
-            parsed_view = _parse_str_replace_editor_cli(action) or _parse_str_replace_editor_json(action)
-            if parsed_view:
-                subcmd, path, args = parsed_view
-                text = _parse_view_observation_to_text(observation)
-                if path and text is not None:
-                    file_state[path] = text
+    for idx, step in enumerate(steps, start=1):
+        action = step.get('action', '')
+        match = create_pattern.search(action)
+        if not match:
             continue
 
-        # 1) echo/printf > file (including "&& python ...")
-        ep = _parse_echo_or_printf_redirect(action)
-        if ep:
-            path, code = ep
-            if _path_is_testish(path) or _thought_is_testish(thought_blob) or _code_is_testish(code):
-                file_state[path] = code
-                method_name, class_name = _infer_names_for_artifact(path, code)
-                if path not in records:
-                    records[path] = {
-                        "path": path,
-                        "step": idx,
-                        "code": code,
-                        "method_name": method_name,
-                        "test_class_name": class_name,
-                    }
-                else:
-                    records[path]["code"] = code
-                    if method_name:
-                        records[path]["method_name"] = method_name
-                    if class_name:
-                        records[path]["test_class_name"] = class_name
+        path = match.group(1)
+        filename = path.split('/')[-1].lower()
+
+        # Filter: filename must contain a test-related keyword
+        if not any(kw in filename for kw in TEST_KEYWORDS):
             continue
 
-        # 2) cat heredoc > file (rare but safe)
-        hd = _parse_cat_heredoc(action)
-        if hd:
-            path, code = hd
-            if _path_is_testish(path) or _thought_is_testish(thought_blob) or _code_is_testish(code):
-                file_state[path] = code
-                method_name, class_name = _infer_names_for_artifact(path, code)
-                if path not in records:
-                    records[path] = {
-                        "path": path,
-                        "step": idx,
-                        "code": code,
-                        "method_name": method_name,
-                        "test_class_name": class_name,
-                    }
-                else:
-                    records[path]["code"] = code
-                    if method_name:
-                        records[path]["method_name"] = method_name
-                    if class_name:
-                        records[path]["test_class_name"] = class_name
-            continue
+        raw_code = match.group(2)
+        # Strip surrounding quotes if present
+        code = raw_code.strip()
+        if (code.startswith("'") and code.endswith("'")) or \
+           (code.startswith('"') and code.endswith('"')):
+            code = code[1:-1]
+        # Remove trailing flags appended after --file_text content
+        # (e.g., " --view_range  --old_str '' --new_str '' --insert_line 0")
+        trailing = re.search(r"\s+--(?:view_range|old_str|new_str|insert_line)\b", code)
+        if trailing:
+            code = code[:trailing.start()]
 
-        # 3) str_replace_editor create/insert/str_replace
-        parsed = _parse_str_replace_editor_cli(action) or _parse_str_replace_editor_json(action)
-        if not parsed:
-            continue
+        method_name = None
+        test_class_name = None
+        method_match = re.search(r'def\s+(test_\w+)', code)
+        if method_match:
+            method_name = method_match.group(1)
+        class_match = re.search(r'class\s+(\w+)', code)
+        if class_match:
+            test_class_name = class_match.group(1)
 
-        subcmd, path, args = parsed
-        if subcmd not in {"create", "insert", "str_replace"} or not path:
-            continue
+        results.append({
+            'path': path,
+            'step': idx,
+            'code': code,
+            'method_name': method_name,
+            'test_class_name': test_class_name,
+        })
 
-        code_snippet = _extract_editor_code(subcmd, args)
+    return results
 
-        # Decide if test artifact
-        is_test_event = False
-        if _path_is_testish(path):
-            is_test_event = True
-        else:
-            filename = os.path.basename(_strip_testbed_prefix(path))
-            filename_hint = bool(
-                _REPRO_VALIDATE_PAT.search("/" + filename) or _TEST_FILE_PAT.search("/" + filename)
-            )
-            if _thought_is_testish(thought_blob) and (filename_hint or _code_is_testish(code_snippet)):
-                is_test_event = True
 
-        if not is_test_event:
-            continue
+def _is_failure(observation: str) -> bool:
+    return any(kw in observation for kw in FAILURE_KEYWORDS)
 
-        # Update file_state best-effort
-        if subcmd == "create":
-            file_state[path] = code_snippet
 
-        elif subcmd == "str_replace":
-            old = args.get("old_str", "") if isinstance(args, dict) else ""
-            new = args.get("new_str", "") if isinstance(args, dict) else code_snippet
-            if path in file_state and old and old in file_state[path]:
-                file_state[path] = file_state[path].replace(old, new, 1)
+def count_fail_to_pass(model_name: str, instance_id: str) -> dict:
+    with open(f'../Trajectories/{model_name}/{instance_id}.traj', 'r') as f:
+        trajectory = json.load(f)
+
+    steps = trajectory.get('trajectory', [])
+    generated_tests = locate_generated_tests(model_name, instance_id)
+    fail_to_pass_tests = []
+
+    for test in generated_tests:
+        test_path = test['path']
+        create_step = test['step']  # 1-indexed
+
+        first_failure_seen = False
+        later_pass_seen = False
+
+        for idx, step in enumerate(steps, start=1):
+            if idx <= create_step:
+                continue
+            action = step.get('action', '')
+            observation = step.get('observation', '')
+            # Check if this step runs the test file with python
+            if 'python' not in action.lower():
+                continue
+            # Check if the test path (or its basename) appears in the action
+            basename = test_path.split('/')[-1]
+            if test_path not in action and basename not in action:
+                continue
+
+            if not first_failure_seen:
+                if _is_failure(observation):
+                    first_failure_seen = True
             else:
-                # if we don't have state, at least keep the new snippet
-                file_state[path] = file_state.get(path, "") or new or code_snippet
+                if not _is_failure(observation):
+                    later_pass_seen = True
+                    break
 
-        elif subcmd == "insert":
-            ins = args.get("insert_text", "") if isinstance(args, dict) else ""
-            ins = ins or code_snippet
-            file_state[path] = (file_state.get(path, "") + ("\n" if file_state.get(path, "") else "") + ins)
+        if first_failure_seen and later_pass_seen:
+            fail_to_pass_tests.append({
+                'path': test_path,
+                'code': test['code'],
+            })
 
-        final_code = file_state.get(path, "") or code_snippet
-        method_name, class_name = _infer_names_for_artifact(path, final_code)
-
-        if path not in records:
-            records[path] = {
-                "path": path,
-                "step": idx,
-                "code": final_code,
-                "method_name": method_name,
-                "test_class_name": class_name,
-            }
-        else:
-            records[path]["code"] = final_code
-            if method_name:
-                records[path]["method_name"] = method_name
-            if class_name:
-                records[path]["test_class_name"] = class_name
-
-    out = list(records.values())
-    out.sort(key=lambda d: d["step"])
-    return out
+    return {'tests': fail_to_pass_tests, 'count': len(fail_to_pass_tests)}
 
 
-# =========================
-# Helper to dump locate_generated_tests.json
-# =========================
+def _add_offset_annotations(data, positions):
+    for i, d in enumerate(data):
+        if len(d) < 2:
+            continue
+        q1, q3 = np.percentile(d, [25, 75])
+        offset = 0.15
+        for val in [q1, q3]:
+            plt.text(positions[i] + offset, val, f'{val:.1f}',
+                     ha='left', va='center', fontsize=9,
+                     bbox=dict(facecolor='white', alpha=0.8,
+                               edgecolor='lightgray', boxstyle='round,pad=0.2'))
 
-def _list_instances_in_dir(model_name: str) -> List[str]:
-    base = os.path.join(TRAJ_ROOT, model_name)
-    traj_files = glob.glob(os.path.join(base, "*.traj"))
-    return sorted([os.path.splitext(os.path.basename(p))[0] for p in traj_files])
+
+def plot_violin():
+    succ_counts = []
+    unsucc_counts = []
+
+    for model, instance in SUCCESSFUL_TRAJS:
+        result = count_fail_to_pass(model, instance)
+        succ_counts.append(result['count'])
+
+    for model, instance in UNSUCCESSFUL_TRAJS:
+        result = count_fail_to_pass(model, instance)
+        unsucc_counts.append(result['count'])
+
+    # Violin plots require >= 2 data points; pad with zeros if needed
+    if len(succ_counts) < 2:
+        succ_counts = succ_counts + [0] * (2 - len(succ_counts))
+    if len(unsucc_counts) < 2:
+        unsucc_counts = unsucc_counts + [0] * (2 - len(unsucc_counts))
+
+    parts = plt.violinplot(
+        [succ_counts, unsucc_counts],
+        showextrema=False,
+        quantiles=[[0.25, 0.75]] * 2
+    )
+
+    if 'cquantiles' in parts:
+        parts['cquantiles'].set_linestyle('--')
+        parts['cquantiles'].set_edgecolor('black')
+
+    _add_offset_annotations([succ_counts, unsucc_counts], [1, 2])
+
+    plt.xticks([1, 2], ['Success', 'Failure'])
+    plt.ylabel('Fail-to-Pass Count')
+    plt.title('Distribution of Fail-to-Pass Tests')
+    plt.savefig('fail_to_pass.jpeg')
+    plt.close()
 
 
-def write_locate_generated_tests_json(
-    gpt_instances: Optional[List[str]] = None,
-    deepseek_instances: Optional[List[str]] = None,
-) -> None:
-    if gpt_instances is None:
-        gpt_instances = _list_instances_in_dir("gpt-5-mini")
-    if deepseek_instances is None:
-        deepseek_instances = _list_instances_in_dir("deepseek-v3")
+def write_all_json():
+    locate_tests_data = {}
+    fail_to_pass_data = {}
 
-    data = {"gpt-5-mini": {}, "deepseek-v3": {}}
+    all_trajectories = [('gpt-5-mini', inst) for inst in GPT_INSTANCES] + \
+                       [('deepseek-v3', inst) for inst in DEEPSEEK_INSTANCES]
 
-    for inst in gpt_instances:
-        data["gpt-5-mini"][inst] = locate_generated_tests("gpt-5-mini", inst)
+    for model, instance in all_trajectories:
+        if model not in locate_tests_data:
+            locate_tests_data[model] = {}
+        if model not in fail_to_pass_data:
+            fail_to_pass_data[model] = {}
 
-    for inst in deepseek_instances:
-        data["deepseek-v3"][inst] = locate_generated_tests("deepseek-v3", inst)
+        locate_tests_data[model][instance] = locate_generated_tests(model, instance)
+        fail_to_pass_data[model][instance] = count_fail_to_pass(model, instance)
 
-    out_path = os.path.join(BASE_DIR, "locate_generated_tests.json")
-    with open(out_path, "w") as f:
-        json.dump(data, f, indent=4)
+    with open('locate_generated_tests.json', 'w') as f:
+        json.dump(locate_tests_data, f, indent=4)
 
-    print(f"Wrote: {out_path}")
-    print(f"Scanned gpt-5-mini: {len(gpt_instances)} trajs, deepseek-v3: {len(deepseek_instances)} trajs")
+    with open('fail_to_pass.json', 'w') as f:
+        json.dump(fail_to_pass_data, f, indent=4)
 
 
 if __name__ == "__main__":
-    write_locate_generated_tests_json()
+    write_all_json()
+    plot_violin()
