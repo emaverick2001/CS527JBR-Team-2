@@ -486,4 +486,3 @@ def write_locate_generated_tests_json(
 
 if __name__ == "__main__":
     write_locate_generated_tests_json()
-
