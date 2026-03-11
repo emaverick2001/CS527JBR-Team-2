@@ -2,6 +2,7 @@ import json
 import re
 import matplotlib.pyplot as plt
 import numpy as np
+from thefuzz import fuzz
 
 from milestone2 import locate_generated_tests
 
@@ -32,52 +33,79 @@ UNSUCCESSFUL_TRAJS = [
     ('gpt-5-mini', 'sphinx-doc__sphinx-11510'),
 ]
 
-FAILURE_KEYWORDS = ['Traceback', ' Error', 'FAILED']
+FAILURE_KEYWORDS = ['Traceback', ' Error', 'FAILED', 'here-document']
 
 
 def _is_failure(observation: str) -> bool:
-    return any(kw in observation for kw in FAILURE_KEYWORDS)
+    return any(kw.lower() in observation.lower() for kw in FAILURE_KEYWORDS)
 
 
 def count_fail_to_pass(model_name: str, instance_id: str) -> dict:
     with open(f'../Trajectories/{model_name}/{instance_id}.traj', 'r') as f:
         trajectory = json.load(f)
 
-    steps = trajectory.get('trajectory', [])
+    # read in the json generated from step 3
+    steps = trajectory['trajectory']
+    total_steps = len(steps)
     generated_tests = locate_generated_tests(model_name, instance_id)
-    fail_to_pass_tests = []
+    # each entry in the list of dict is 1 test generated
+    # the step will give us the step where the test was first generated
+    # check for the precense of python <test path> if the action contain this
+    # check for the observation see if it has error keywords
+    # this will trigger the first flag, then keep going and identify the step contains python testpath,
+    # if no Error keyword then test is passed, can cross check by checking the next step thought
 
+    # take note we need to subtract -1 from the generated_test step
+
+    fail_to_pass_tests = []
     for test in generated_tests:
         test_path = test['path']
         create_step = test['step']  # 1-indexed
 
         first_failure_seen = False
         later_pass_seen = False
+        for step in range(create_step-1, total_steps):
+            # there can be different version of python and the agent can cd before running the script so just check if the filename and python appear
+            file_name = test_path.split('/')[-1]
+            python_regex = r'python\d*(?:\.\d+)*'
+            pattern = rf'{python_regex}\s+(?:{test_path}|{file_name})'
+            matches = re.findall(pattern, steps[step]['action'])
+            if matches:
+                # when we run the code sometime we get output that is not an error so we need to check if it is a expected output or not in the thought of the next step
+                if _is_failure(steps[step]['observation']):
+                    # is this the first time we are seeing this failure
+                    if not first_failure_seen:
+                        first_failure_seen = True
 
-        for idx, step in enumerate(steps, start=1):
-            if idx <= create_step:
-                continue
-            action = step.get('action', '')
-            observation = step.get('observation', '')
-            if 'python' not in action.lower():
-                continue
-            basename = test_path.split('/')[-1]
-            if test_path not in action and basename not in action:
-                continue
+                    else:
+                        score = fuzz.partial_ratio(
+                            steps[step+1]['thought'].lower(), 'verified the fix')
+                        score2 = fuzz.partial_ratio(
+                            steps[step+1]['thought'].lower(), 'produces the expected outcome')
+                        if score > 70 or score2 > 70:
+                            print('ge', step)
+                            fail_to_pass_tests.append({
+                                'path': test_path,
+                                'code': test['code'],
+                            })
 
-            if not first_failure_seen:
-                if _is_failure(observation):
-                    first_failure_seen = True
-            else:
-                if not _is_failure(observation):
-                    later_pass_seen = True
+                # sometimes the output does not contain any error but this is not the expected outcome
+                elif fuzz.partial_ratio(steps[step+1]['thought'].lower(), "did not produce expected outcome") > 70:
+                    # the test script did not produce the expected outcome so considered a failed test
+                    print(step)
+                    if not first_failure_seen:
+                        first_failure_seen = True
+
+                else:
+                    # check if it encountered an error before
+                    # or the thought in the next step says that this is the error that we expected
+                    print(step)
+                    if first_failure_seen:
+                        fail_to_pass_tests.append({
+                            'path': test_path,
+                            'code': test['code'],
+                        })
                     break
-
-        if first_failure_seen and later_pass_seen:
-            fail_to_pass_tests.append({
-                'path': test_path,
-                'code': test['code'],
-            })
 
     return {'tests': fail_to_pass_tests, 'count': len(fail_to_pass_tests)}
 
@@ -96,8 +124,10 @@ def _add_offset_annotations(data, positions):
 
 
 def plot_violin():
-    succ_counts = [count_fail_to_pass(m, i)['count'] for m, i in SUCCESSFUL_TRAJS]
-    unsucc_counts = [count_fail_to_pass(m, i)['count'] for m, i in UNSUCCESSFUL_TRAJS]
+    succ_counts = [count_fail_to_pass(m, i)['count']
+                   for m, i in SUCCESSFUL_TRAJS]
+    unsucc_counts = [count_fail_to_pass(m, i)['count']
+                     for m, i in UNSUCCESSFUL_TRAJS]
 
     if len(succ_counts) < 2:
         succ_counts = succ_counts + [0] * (2 - len(succ_counts))
@@ -121,3 +151,45 @@ def plot_violin():
     plt.title('Distribution of Fail-to-Pass Tests')
     plt.savefig('fail_to_pass.jpeg')
     plt.close()
+
+
+# if __name__ == "__main__":
+    # # the trajectories to find steps for
+    # gpt_instances = ['django__django-13109',
+    #                  'django__django-17029',
+    #                  'django__django-10880',
+    #                  'django__django-13837',
+    #                  'django__django-16661',
+    #                  'pylint-dev__pylint-7277',
+    #                  'sphinx-doc__sphinx-11510']
+
+    # deepseek_instances = ['sphinx-doc__sphinx-9281',
+    #                       'sympy__sympy-14531',
+    #                       'sympy__sympy-24539',
+    #                       'astropy__astropy-13033',
+    #                       'django__django-11138',
+    #                       'django__django-11141',
+    #                       'django__django-11211',
+    #                       'django__django-12308',
+    #                       'django__django-14351',
+    #                       'django__django-15268',
+    #                       'pydata__xarray-4695',
+    #                       'pylint-dev__pylint-7277',
+    #                       'sympy__sympy-24443']
+    # gpt_steps = {}
+    # deepseek_steps = {}
+    # data = {}
+    # for instance in gpt_instances:
+    #     gpt_steps[instance] = count_fail_to_pass("gpt-5-mini", instance)
+    # for instance in deepseek_instances:
+    #     deepseek_steps[instance] = count_fail_to_pass("deepseek-v3", instance)
+
+    # data['gpt-5-mini'] = gpt_steps
+    # data['deepseek-v3'] = deepseek_steps
+
+    # with open("thought_entity_relevance.json", "w") as f:
+    #     json.dump(data, f, indent=4)
+
+    # plot_violin()
+
+    # print(count_fail_to_pass('deepseek-v3', 'pydata__xarray-4695'))

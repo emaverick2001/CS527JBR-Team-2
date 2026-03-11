@@ -10,13 +10,8 @@
             "count": 1
         },
         "django__django-17029": {
-            "tests": [
-                {
-                    "path": "/testbed/repro.py",
-                    "code": "from django.apps.registry import apps\n\nprint('Before any call:')\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)\n\nprint('\\nCall get_swappable_settings_name(\"x.y\")')\napps.get_swappable_settings_name('x.y')\ninfo = apps.get_swappable_settings_name.cache_info()\nprint('After call cache_info:', info)\n\nprint('\\nCall clear_cache()')\napps.clear_cache()\n\ntry:\n    info = apps.get_swappable_settings_name.cache_info()\n    print('After clear_cache cache_info:', info)\nexcept AttributeError as e:\n    print('no cache_info:', e)"
-                }
-            ],
-            "count": 1
+            "tests": [],
+            "count": 0
         },
         "django__django-10880": {
             "tests": [],
@@ -29,11 +24,15 @@
         "django__django-16661": {
             "tests": [
                 {
-                    "path": "/testbed/reproduce.py",
-                    "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.contrib.admin import ModelAdmin\nfrom django.contrib.admin.sites import AdminSite\nfrom django.db import models\n\nclass Country(models.Model):\n    name = models.CharField(max_length=256)\n    class Meta:\n        app_label = 'myapp'\n\nclass Place(models.Model):\n    country = models.ForeignKey(Country, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass Restaurant(models.Model):\n    place = models.OneToOneField(Place, models.CASCADE, primary_key=True)\n    class Meta:\n        app_label = 'myapp'\n\nclass Waiter(models.Model):\n    restaurant = models.ForeignKey(Restaurant, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass WaiterAdmin(ModelAdmin):\n    list_filter = ['restaurant__place__country']\n\nsite = AdminSite()\nma = WaiterAdmin(Waiter, site)\nprint('lookup_allowed:', ma.lookup_allowed('restaurant__place__country', 'test_value'))\n"
+                    "path": "/testbed/reproduce_onetoone.py",
+                    "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[],\n    ROOT_URLCONF=__name__,\n)\n\ndjango.setup()\nfrom django.contrib.admin import ModelAdmin\nfrom django.contrib.admin.sites import AdminSite\nfrom django.db import models\n\nclass Department(models.Model):\n    code = models.CharField(max_length=4, unique=True)\n    class Meta:\n        app_label = 'myapp'\n\nclass Employee(models.Model):\n    department = models.ForeignKey(Department, models.CASCADE, to_field='code')\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeProfile(models.Model):\n    employee = models.OneToOneField(Employee, models.CASCADE)\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeInfo(models.Model):\n    employee = models.OneToOneField(Employee, models.CASCADE)\n    description = models.CharField(max_length=100)\n    class Meta:\n        app_label = 'myapp'\n\nclass EmployeeProfileAdmin(ModelAdmin):\n    list_filter = [\n        'employee__employeeinfo__description',\n        'employee__department__code',\n    ]\n\nsite = AdminSite()\nma = EmployeeProfileAdmin(EmployeeProfile, site)\nprint('lookup_allowed employeeinfo description:', ma.lookup_allowed('employee__employeeinfo__description', 'test_value'))\nprint('lookup_allowed department code:', ma.lookup_allowed('employee__department__code', 'test_value'))"
+                },
+                {
+                    "path": "/testbed/run_pr_test.py",
+                    "code": "import django\nfrom django.conf import settings\n\nsettings.configure(\n    INSTALLED_APPS=[\n        \"django.contrib.admin\",\n        \"django.contrib.auth\",\n        \"django.contrib.contenttypes\",\n        \"django.contrib.sessions\",\n        \"django.contrib.messages\",\n        \"django.contrib.staticfiles\",\n        \"tests\",\n    ],\n    DATABASES={\"default\": {\"ENGINE\": \"django.db.backends.sqlite3\", \"NAME\": \":memory:\"}},\n    MIDDLEWARE=[\n        'django.contrib.sessions.middleware.SessionMiddleware',\n        'django.contrib.auth.middleware.AuthenticationMiddleware',\n        'django.contrib.messages.middleware.MessageMiddleware',\n    ],\n    ROOT_URLCONF=\"test_urls\",\n    TEMPLATES=[\n        {\n            'BACKEND': 'django.template.backends.django.DjangoTemplates',\n            'DIRS': [],\n            'APP_DIRS': True,\n            'OPTIONS': {'context_processors': ['django.contrib.auth.context_processors.auth', 'django.contrib.messages.context_processors.messages', 'django.template.context_processors.request']},\n        }\n    ],\n)\n\n\n# minimal urlconf file\nwith open('test_urls.py', 'w') as f:\n    f.write(\"from django.urls import path\\nurlpatterns = []\\n\")\n\ndjango.setup()\nfrom django.core.management import call_command\n\n# Run the specific test that was described in the PR\ncall_command('test', 'tests.modeladmin', verbosity=2)\n\n"
                 }
             ],
-            "count": 1
+            "count": 2
         },
         "pylint-dev__pylint-7277": {
             "tests": [],
@@ -63,8 +62,13 @@
             "count": 0
         },
         "astropy__astropy-13033": {
-            "tests": [],
-            "count": 0
+            "tests": [
+                {
+                    "path": "/testbed/reproduce_error.py",
+                    "code": "from astropy.time import Time\nfrom astropy.timeseries import TimeSeries\nimport numpy as np\n\ntime = Time(np.arange(100000, 100003), format='jd')\nts = TimeSeries(time=time, data={\"flux\": [99.9, 99.8, 99.7]})\nts._required_columns = [\"time\", \"flux\"]\nts.remove_column(\"flux\")"
+                }
+            ],
+            "count": 1
         },
         "django__django-11138": {
             "tests": [],
