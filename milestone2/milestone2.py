@@ -4,7 +4,7 @@ import os
 import re
 import shlex
 from typing import Any, Dict, Iterable, List, Optional, Tuple
-
+from thefuzz import fuzz
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.abspath(os.path.join(BASE_DIR, ".."))
@@ -63,7 +63,7 @@ UNSUCCESSFUL_TRAJS = [
     ('gpt-5-mini', 'sphinx-doc__sphinx-11510'),
 ]
 
-FAILURE_KEYWORDS = ['Traceback', ' Error', 'FAILED']
+FAILURE_KEYWORDS = ['Traceback', ' Error', 'FAILED', 'here-document']
 
 
 _STRONG_PATH_RE = re.compile(
@@ -188,7 +188,8 @@ def _extract_target_names(text: str) -> Tuple[str, str]:
     for dotted_target in re.findall(r"\b(?:[A-Za-z_]\w*\.)+test_[A-Za-z0-9_]+\b", text):
         parts = dotted_target.split(".")
         method_name = parts[-1]
-        class_name = parts[-2] if len(parts) >= 2 and parts[-2][:1].isupper() else ""
+        class_name = parts[-2] if len(
+            parts) >= 2 and parts[-2][:1].isupper() else ""
         return method_name, class_name
 
     return "", ""
@@ -224,7 +225,8 @@ def _unwrap_shell_script(action: str) -> str:
     ]
 
     while script:
-        matched_prefix = next((prefix for prefix in prefixes if script.startswith(prefix)), "")
+        matched_prefix = next(
+            (prefix for prefix in prefixes if script.startswith(prefix)), "")
         if not matched_prefix:
             return script
 
@@ -264,7 +266,8 @@ def _parse_editor_action(action: str) -> Optional[Tuple[str, str, Dict[str, Any]
         while index < len(tokens):
             token = tokens[index]
             if token.startswith("--"):
-                args[token[2:]] = tokens[index + 1] if index + 1 < len(tokens) else ""
+                args[token[2:]] = tokens[index + 1] if index + \
+                    1 < len(tokens) else ""
                 index += 2
             else:
                 index += 1
@@ -448,7 +451,8 @@ def locate_generated_tests(model_name: str, instance_id: str) -> list:
     for index, step in enumerate(traj.get("trajectory", []), start=1):
         action = step.get("action") or ""
         observation = step.get("observation") or ""
-        context = "\n".join(filter(None, [step.get("thought"), step.get("response")]))
+        context = "\n".join(
+            filter(None, [step.get("thought"), step.get("response")]))
 
         parsed = _parse_editor_action(action)
         if parsed and parsed[0] == "view":
@@ -462,9 +466,11 @@ def locate_generated_tests(model_name: str, instance_id: str) -> list:
         if parsed and parsed[0] in {"create", "insert", "str_replace"}:
             subcmd, path, args = parsed
             if _editor_write_succeeded(subcmd, observation):
-                updated_code, is_full_snapshot = _apply_editor_write(path, subcmd, args, observation, file_state)
+                updated_code, is_full_snapshot = _apply_editor_write(
+                    path, subcmd, args, observation, file_state)
                 file_state[path] = updated_code
-                events.append((path, updated_code, updated_code or _extract_editor_text(subcmd, args), is_full_snapshot))
+                events.append((path, updated_code, updated_code or _extract_editor_text(
+                    subcmd, args), is_full_snapshot))
 
         for path, code in _extract_shell_writes(action):
             file_state[path] = code
@@ -483,48 +489,71 @@ def locate_generated_tests(model_name: str, instance_id: str) -> list:
 
 
 def _is_failure(observation: str) -> bool:
-    return any(kw in observation for kw in FAILURE_KEYWORDS)
+    return any(kw.lower() in observation.lower() for kw in FAILURE_KEYWORDS)
 
 
 def count_fail_to_pass(model_name: str, instance_id: str) -> dict:
-    with open(_trajectory_path(model_name, instance_id), 'r') as f:
+    with open(f'../Trajectories/{model_name}/{instance_id}.traj', 'r') as f:
         trajectory = json.load(f)
 
-    steps = trajectory.get('trajectory', [])
+    # read in the json generated from step 3
+    steps = trajectory['trajectory']
+    total_steps = len(steps)
     generated_tests = locate_generated_tests(model_name, instance_id)
-    fail_to_pass_tests = []
+    # each entry in the list of dict is 1 test generated
+    # the step will give us the step where the test was first generated
+    # check for the precense of python <test path> if the action contain this
+    # check for the observation see if it has error keywords
+    # this will trigger the first flag, then keep going and identify the step contains python testpath,
+    # if no Error keyword then test is passed, can cross check by checking the next step thought
 
+    # take note we need to subtract -1 from the generated_test step
+
+    fail_to_pass_tests = []
     for test in generated_tests:
         test_path = test['path']
-        create_step = test['step']
+        create_step = test['step']  # 1-indexed
 
         first_failure_seen = False
-        later_pass_seen = False
+        for step in range(create_step-1, total_steps):
+            # there can be different version of python and the agent can cd before running the script so just check if the filename and python appear
+            file_name = test_path.split('/')[-1]
+            python_regex = r'python\d*(?:\.\d+)*'
+            pattern = rf'{python_regex}\s+(?:{test_path}|{file_name})'
+            matches = re.findall(pattern, steps[step]['action'])
+            if matches:
+                # when we run the code sometime we get output that is not an error so we need to check if it is a expected output or not in the thought of the next step
+                if _is_failure(steps[step]['observation']):
+                    # is this the first time we are seeing this failure
+                    if not first_failure_seen:
+                        first_failure_seen = True
 
-        for idx, step in enumerate(steps, start=1):
-            if idx <= create_step:
-                continue
-            action = step.get('action', '')
-            observation = step.get('observation', '')
-            if 'python' not in action.lower():
-                continue
-            basename = test_path.split('/')[-1]
-            if test_path not in action and basename not in action:
-                continue
+                    else:
+                        score = fuzz.partial_ratio(
+                            steps[step+1]['thought'].lower(), 'verified the fix')
+                        score2 = fuzz.partial_ratio(
+                            steps[step+1]['thought'].lower(), 'produces the expected outcome')
+                        if score > 70 or score2 > 70:
+                            fail_to_pass_tests.append({
+                                'path': test_path,
+                                'code': test['code'],
+                            })
 
-            if not first_failure_seen:
-                if _is_failure(observation):
-                    first_failure_seen = True
-            else:
-                if not _is_failure(observation):
-                    later_pass_seen = True
+                # sometimes the output does not contain any error but this is not the expected outcome
+                elif fuzz.partial_ratio(steps[step+1]['thought'].lower(), "did not produce expected outcome") > 70:
+                    # the test script did not produce the expected outcome so considered a failed test
+                    if not first_failure_seen:
+                        first_failure_seen = True
+
+                else:
+                    # check if it encountered an error before
+                    # or the thought in the next step says that this is the error that we expected
+                    if first_failure_seen:
+                        fail_to_pass_tests.append({
+                            'path': test_path,
+                            'code': test['code'],
+                        })
                     break
-
-        if first_failure_seen and later_pass_seen:
-            fail_to_pass_tests.append({
-                'path': test_path,
-                'code': test['code'],
-            })
 
     return {'tests': fail_to_pass_tests, 'count': len(fail_to_pass_tests)}
 
@@ -586,6 +615,8 @@ def plot_violin():
 def write_all_json():
     locate_tests_data = {}
     fail_to_pass_data = {}
+    tool_use_data = {}
+    locate_nav_data = {}
 
     all_trajectories = [('gpt-5-mini', inst) for inst in GPT_INSTANCES] + \
                        [('deepseek-v3', inst) for inst in DEEPSEEK_INSTANCES]
@@ -595,15 +626,30 @@ def write_all_json():
             locate_tests_data[model] = {}
         if model not in fail_to_pass_data:
             fail_to_pass_data[model] = {}
+        if model not in tool_use_data:
+            tool_use_data[model] = {}
+        if model not in locate_nav_data:
+            locate_nav_data[model] = {}
 
-        locate_tests_data[model][instance] = locate_generated_tests(model, instance)
-        fail_to_pass_data[model][instance] = count_fail_to_pass(model, instance)
+        locate_tests_data[model][instance] = locate_generated_tests(
+            model, instance)
+        fail_to_pass_data[model][instance] = count_fail_to_pass(
+            model, instance)
+
+        tool_use_data[model][instance] = count_tool_use(model, instance)
+        locate_nav_data[model][instance] = locate_navigation(model, instance)
 
     with open('locate_generated_tests.json', 'w') as f:
         json.dump(locate_tests_data, f, indent=4)
 
     with open('fail_to_pass.json', 'w') as f:
         json.dump(fail_to_pass_data, f, indent=4)
+
+    with open('count_tool_use.json', 'w') as f:
+        json.dump(tool_use_data, f, indent=4)
+
+    with open('locate_navigation.json', 'w') as f:
+        json.dump(locate_nav_data, f, indent=4)
 
 
 if __name__ == "__main__":
