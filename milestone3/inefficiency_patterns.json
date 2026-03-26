@@ -15,31 +15,38 @@
         "django__django-10880": {
             "Status": "unresolved",
             "Patterns": [
-                "flip_flop"
+                "flip_flop",
+                "scroll_behavior"
             ]
         },
         "django__django-13837": {
             "Status": "unresolved",
             "Patterns": [
-                "flip_flop"
+                "repeat_failed_edit",
+                "flip_flop",
+                "scroll_behavior",
+                "abandonment"
             ]
         },
         "django__django-16661": {
             "Status": "unresolved",
             "Patterns": [
-                "flip_flop"
+                "flip_flop",
+                "scroll_behavior"
             ]
         },
         "pylint-dev__pylint-7277": {
             "Status": "unresolved",
             "Patterns": [
-                "flip_flop"
+                "repeat_failed_edit",
+                "scroll_behavior"
             ]
         },
         "sphinx-doc__sphinx-11510": {
             "Status": "unresolved",
             "Patterns": [
-                "flip_flop"
+                "flip_flop",
+                "scroll_behavior"
             ]
         }
     },
@@ -78,15 +85,21 @@
         },
         "django__django-14351": {
             "Status": "unresolved",
-            "Patterns": []
+            "Patterns": [
+                "scroll_behavior"
+            ]
         },
         "django__django-15268": {
             "Status": "unresolved",
-            "Patterns": []
+            "Patterns": [
+                "scroll_behavior"
+            ]
         },
         "pydata__xarray-4695": {
             "Status": "unresolved",
-            "Patterns": []
+            "Patterns": [
+                "scroll_behavior"
+            ]
         },
         "pylint-dev__pylint-7277": {
             "Status": "unresolved",
@@ -94,7 +107,10 @@
         },
         "sympy__sympy-24443": {
             "Status": "unresolved",
-            "Patterns": []
+            "Patterns": [
+                "scroll_behavior",
+                "zoom_out"
+            ]
         }
     }
 }
