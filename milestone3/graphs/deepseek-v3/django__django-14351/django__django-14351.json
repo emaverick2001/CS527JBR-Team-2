@@ -1,0 +1,509 @@
+{
+  "directed": true,
+  "multigraph": true,
+  "graph": {
+    "resolution_status": "unresolved",
+    "instance_name": "django__django-14351",
+    "debug_difficulty": "15 min - 1 hour"
+  },
+  "nodes": [
+    {
+      "label": "str_replace_editor: create",
+      "args": {
+        "path": "/testbed/reproduce_error.py",
+        "file_text": "from django.db.models import Q, Count\nfrom property.models import PropertyGroup, ManagementAgent\n\n# Example usage to reproduce the error\ndef reproduce_error():\n    management_agent = ManagementAgent.objects.first()  # Replace with actual logic to get an agent\n    property_groups = PropertyGroup.objects.agent_groups(management_agent)\n    queryset = ManagementAgent.objects.annotate(Count(\"property_groups\"))\n    try:\n        queryset.filter(\n            Q(property_groups__in=property_groups)\n            | Q(property_groups__count=0)\n        ).distinct()\n        print(\"Query executed successfully.\")\n    except Exception as e:\n        print(f\"Error: {e}\")\n\nif __name__ == \"__main__\":\n    reproduce_error()"
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        0
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "create",
+      "id": "0:str_replace_editor: create"
+    },
+    {
+      "label": "cd",
+      "args": [
+        "/testbed"
+      ],
+      "flags": {},
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        1
+      ],
+      "tool": "",
+      "command": "cd",
+      "subcommand": "",
+      "id": "1:cd"
+    },
+    {
+      "label": "python",
+      "args": [
+        "reproduce_error.py"
+      ],
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        1
+      ],
+      "tool": "",
+      "command": "python",
+      "subcommand": "",
+      "id": "2:python"
+    },
+    {
+      "label": "ls",
+      "args": [],
+      "flags": {
+        "l": "/testbed"
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        2
+      ],
+      "tool": "",
+      "command": "ls",
+      "subcommand": "",
+      "id": "3:ls"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py"
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        3
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "4:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "view_range": [
+          230,
+          240
+        ]
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        4
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "5:str_replace_editor: view"
+    },
+    {
+      "label": "grep",
+      "args": [
+        "/testbed/django/db/models/sql/query.py"
+      ],
+      "flags": {
+        "n": "get_default_columns"
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        5
+      ],
+      "tool": "",
+      "command": "grep",
+      "subcommand": "",
+      "id": "6:grep"
+    },
+    {
+      "label": "grep",
+      "args": [
+        "/testbed/django/db/models/sql/query.py"
+      ],
+      "flags": {
+        "n": "default_cols"
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        6
+      ],
+      "tool": "",
+      "command": "grep",
+      "subcommand": "",
+      "id": "7:grep"
+    },
+    {
+      "label": "grep",
+      "args": [
+        "/testbed/django/db/models/sql/query.py"
+      ],
+      "flags": {
+        "n": "cols"
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        7
+      ],
+      "tool": "",
+      "command": "grep",
+      "subcommand": "",
+      "id": "8:grep"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "view_range": [
+          1360,
+          1400
+        ]
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        8
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "9:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "view_range": [
+          1150,
+          1300
+        ]
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        9
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "10:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "view_range": [
+          1200,
+          1300
+        ]
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        10
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "11:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "view_range": [
+          1250,
+          1300
+        ]
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        11
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "12:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: str_replace",
+      "args": {
+        "path": "/testbed/django/db/models/sql/query.py",
+        "old_str": "if reffed_expression:\n            condition = self.build_lookup(lookups, reffed_expression, value)\n            clause.add(condition, AND)\n            return clause, []",
+        "new_str": "if reffed_expression:\n            # Handle __in lookups to only select the PK field when doing OR queries\n            if lookups and lookups[-1] == 'in' and isinstance(reffed_expression, Col):\n                condition = self.build_lookup(lookups, reffed_expression, value)\n                # Force single column selection similar to __id__in behavior\n                if hasattr(condition, 'rhs') and hasattr(condition.rhs, 'query'):\n                    condition.rhs.query.set_select([Col(None, reffed_expression.field)])\n            else:\n                condition = self.build_lookup(lookups, reffed_expression, value)\n            clause.add(condition, AND)\n            return clause, []",
+        "edit_status": "success"
+      },
+      "flags": {},
+      "phases": [
+        "patch"
+      ],
+      "step_indices": [
+        12
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "str_replace",
+      "id": "13:str_replace_editor: str_replace"
+    },
+    {
+      "label": "think",
+      "args": {},
+      "flags": {},
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        13
+      ],
+      "tool": null,
+      "command": null,
+      "subcommand": null,
+      "id": "14:think"
+    },
+    {
+      "label": "submit",
+      "args": {},
+      "flags": {},
+      "phases": [
+        "general",
+        "general"
+      ],
+      "step_indices": [
+        14,
+        17
+      ],
+      "tool": "submit",
+      "command": "",
+      "subcommand": "",
+      "id": "15:submit"
+    },
+    {
+      "label": "rm",
+      "args": [
+        "/testbed/reproduce_error.py"
+      ],
+      "flags": {},
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        15
+      ],
+      "tool": "",
+      "command": "rm",
+      "subcommand": "",
+      "id": "16:rm"
+    },
+    {
+      "label": "str_replace_editor: undo_edit",
+      "args": {
+        "path": "/testbed/reproduce_error.py"
+      },
+      "flags": {},
+      "phases": [
+        "validation"
+      ],
+      "step_indices": [
+        16
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "undo_edit",
+      "id": "17:str_replace_editor: undo_edit"
+    }
+  ],
+  "edges": [
+    {
+      "label": "1",
+      "type": "exec",
+      "source": "0:str_replace_editor: create",
+      "target": "1:cd",
+      "key": 0
+    },
+    {
+      "label": "1",
+      "type": "exec",
+      "source": "1:cd",
+      "target": "2:python",
+      "key": 0
+    },
+    {
+      "label": "2",
+      "type": "exec",
+      "source": "2:python",
+      "target": "3:ls",
+      "key": 0
+    },
+    {
+      "label": "3",
+      "type": "exec",
+      "source": "3:ls",
+      "target": "4:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "4",
+      "type": "exec",
+      "source": "4:str_replace_editor: view",
+      "target": "5:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "4:str_replace_editor: view",
+      "target": "5:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "type": "hier",
+      "source": "4:str_replace_editor: view",
+      "target": "9:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "4:str_replace_editor: view",
+      "target": "10:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "5",
+      "type": "exec",
+      "source": "5:str_replace_editor: view",
+      "target": "6:grep",
+      "key": 0
+    },
+    {
+      "label": "6",
+      "type": "exec",
+      "source": "6:grep",
+      "target": "7:grep",
+      "key": 0
+    },
+    {
+      "label": "7",
+      "type": "exec",
+      "source": "7:grep",
+      "target": "8:grep",
+      "key": 0
+    },
+    {
+      "label": "8",
+      "type": "exec",
+      "source": "8:grep",
+      "target": "9:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "9",
+      "type": "exec",
+      "source": "9:str_replace_editor: view",
+      "target": "10:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "10",
+      "type": "exec",
+      "source": "10:str_replace_editor: view",
+      "target": "11:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "10:str_replace_editor: view",
+      "target": "11:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "type": "hier",
+      "source": "10:str_replace_editor: view",
+      "target": "12:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "11",
+      "type": "exec",
+      "source": "11:str_replace_editor: view",
+      "target": "12:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "11:str_replace_editor: view",
+      "target": "12:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "label": "12",
+      "type": "exec",
+      "source": "12:str_replace_editor: view",
+      "target": "13:str_replace_editor: str_replace",
+      "key": 0
+    },
+    {
+      "label": "13",
+      "type": "exec",
+      "source": "13:str_replace_editor: str_replace",
+      "target": "14:think",
+      "key": 0
+    },
+    {
+      "label": "14",
+      "type": "exec",
+      "source": "14:think",
+      "target": "15:submit",
+      "key": 0
+    },
+    {
+      "label": "15",
+      "type": "exec",
+      "source": "15:submit",
+      "target": "16:rm",
+      "key": 0
+    },
+    {
+      "label": "16",
+      "type": "exec",
+      "source": "16:rm",
+      "target": "17:str_replace_editor: undo_edit",
+      "key": 0
+    },
+    {
+      "label": "17",
+      "type": "exec",
+      "source": "17:str_replace_editor: undo_edit",
+      "target": "15:submit",
+      "key": 0
+    }
+  ]
+}
