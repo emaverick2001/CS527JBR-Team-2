@@ -1,16 +1,10 @@
 # Milestone 3 Report
 
-`milestone3.py` regenerates the Task 2 and Task 3 deliverables from the Graphectory JSON files:
-
-```bash
-python3 milestone3/milestone3.py
-```
-
-For Task 1, the repository now contains 20 graph PDFs and 20 graph JSONs under `milestone3/graphs`. The original nested model/instance layout is preserved for analysis, and flat copies named `{model}-{instance_id}.{pdf,json}` are also present directly under `milestone3/graphs` to match the submission naming convention.
+This README contains the required analysis for Tasks 2, 3, and 4.
 
 ## Task 2 Report
 
-For this task, I treated Structural Breadth as the paper defines it: the maximum out-degree over structural edges in Graphectory. The table below compares the required graph metrics for resolved and unresolved trajectories across the 20 assigned runs.
+The table below compares the required graph metrics for resolved and unresolved trajectories across the 20 assigned runs.
 
 | Status | Trajectories | Avg Node Count | Avg Temp Edge Count | Avg Loop Count | Avg Loop Length | Avg Structural Edge Count | Avg Structural Breadth |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -30,7 +24,7 @@ The trend is strongest for `gpt-5-mini`, where every required metric is noticeab
 
 ## Task 3 Report
 
-<img src="task3.png" alt="Logo" width="600"/>
+![Task 3 visualization](task3.png)
 
 The table below summarizes how often each Graphectory inefficiency pattern appeared in resolved versus unresolved trajectories.
 
@@ -39,17 +33,15 @@ The table below summarizes how often each Graphectory inefficiency pattern appea
 | Resolved | 5 | 0 | 2 | 0 | 0 | 0 | 0 |
 | Unresolved | 15 | 2 | 4 | 9 | 0 | 1 | 1 |
 
-<br></br>
-
-The visualization and table together reveal a clear distinction between resolved and unresolved trajectories. Most anti-patterns—such as `repeat_failed_edit`, `scroll_behavior`, `zoom_out`, and `abandonment` appear exclusively in unresolved cases. In contrast, resolved trajectories exhibit very few inefficiencies overall.
+The visualization and table together reveal a clear distinction between resolved and unresolved trajectories. Most anti-patterns, such as `repeat_failed_edit`, `scroll_behavior`, `zoom_out`, and `abandonment`, appear exclusively in unresolved cases. In contrast, resolved trajectories exhibit very few inefficiencies overall.
 
 Among all patterns, `scroll_behavior` is the dominant inefficiency in this dataset, appearing in **9/15 unresolved trajectories** and in **0/5 resolved ones**. This suggests a strong “complexity trap,” where the agent struggles to maintain a coherent understanding of the code and resorts to excessive navigation. This often leads to fragmented context and poorer decisions. Its co-occurrence with patterns like `repeat_failed_edit` further indicates compounding confusion rather than isolated mistakes.
 
-Interestingly, `flip_flop` is the only pattern observed in both resolved and unresolved trajectories, but it likely serves different roles. In resolved runs, it can be interpreted as a **strategic rollback**, where the agent corrects itself after detecting an issue. However in unresolved trajectories, it often appears alongside other inefficiencies such as `scroll_behavior` or `repeat_failed_edit`. This suggests that it is less about recovery and more a symptom of instability when the agent lacks a clear path forward. 
+Interestingly, `flip_flop` is the only pattern observed in both resolved and unresolved trajectories, but it likely serves different roles. In resolved runs, it can be interpreted as a strategic rollback, where the agent corrects itself after detecting an issue. In unresolved trajectories, it often appears alongside other inefficiencies such as `scroll_behavior` or `repeat_failed_edit`. This suggests that it is less about recovery and more a symptom of instability when the agent lacks a clear path forward.
 
-The rarer patterns such as `repeat_failed_edit`, `zoom_out`, and `abandonment` could also diagnose a unresolved trajectory. These patterns signal that the agent either failed to converge on the correct edit or drifted away from a productive repair path. Notably, `back_and_forth_switch` does not appear in any of the 20 trajectories.
+The rarer patterns such as `repeat_failed_edit`, `zoom_out`, and `abandonment` are also strong signals of an unresolved trajectory. These patterns show that the agent either failed to converge on the correct edit or drifted away from a productive repair path. `back_and_forth_switch` does not appear in any of the 20 trajectories.
 
-Overall, successful trajectories are characterized by **controlled and limited inefficiencies**, whereas unresolved trajectories exhibit **multiple, overlapping anti-patterns** that compound and hinder effective recovery.
+Overall, successful trajectories are characterized by controlled and limited inefficiencies, whereas unresolved trajectories exhibit multiple overlapping anti-patterns that compound and hinder effective recovery.
 
 ## Task 4 Report
 
