@@ -1,3 +1,4 @@
+from graph_analysis.analyzer import TrajectoryGraphAnalyzer
 import json
 from pathlib import Path
 
@@ -13,16 +14,16 @@ GRAPHECTORY_DIR = REPO_ROOT / "graphectory"
 if str(GRAPHECTORY_DIR) not in sys.path:
     sys.path.insert(0, str(GRAPHECTORY_DIR))
 
-from graph_analysis.analyzer import TrajectoryGraphAnalyzer
-
 
 def _analysis_csv_path(model_name: str) -> Path:
     """
     Resolve the model-level analysis CSV.
     """
     candidate_paths = [
-        REPO_ROOT / "analysis" / "SWE-agent" / "analysis" / model_name / "trajectory_metrics.csv",
-        REPO_ROOT / "graphectory" / "data" / "SWE-agent" / "analysis" / model_name / "trajectory_metrics.csv",
+        REPO_ROOT / "analysis" / "SWE-agent" / "analysis" /
+        model_name / "trajectory_metrics.csv",
+        REPO_ROOT / "graphectory" / "data" / "SWE-agent" /
+        "analysis" / model_name / "trajectory_metrics.csv",
     ]
 
     for candidate_path in candidate_paths:
@@ -42,7 +43,8 @@ def _instance_metrics_row(model_name: str, instance_id: str) -> pd.Series:
     instance_rows = graph_metrics.query('instance == @instance_id')
 
     if instance_rows.empty:
-        raise KeyError(f"Instance '{instance_id}' was not found in {file_name}")
+        raise KeyError(
+            f"Instance '{instance_id}' was not found in {file_name}")
 
     return instance_rows.iloc[0]
 
@@ -51,7 +53,8 @@ def _graph_json_path(model_name: str, instance_id: str) -> Path:
     """Resolve the generated graph JSON for one model/instance pair."""
     graph_path = GRAPHS_DIR / model_name / instance_id / f"{instance_id}.json"
     if not graph_path.exists():
-        raise FileNotFoundError(f"Graph JSON does not exist for '{model_name}/{instance_id}': {graph_path}")
+        raise FileNotFoundError(
+            f"Graph JSON does not exist for '{model_name}/{instance_id}': {graph_path}")
     return graph_path
 
 
@@ -60,7 +63,8 @@ def _structural_breadth(model_name: str, instance_id: str) -> int:
     Paper definition of Structural Breadth (SB):
     maximum out-degree over structural edges.
     """
-    graph_data = json.loads(_graph_json_path(model_name, instance_id).read_text())
+    graph_data = json.loads(_graph_json_path(
+        model_name, instance_id).read_text())
     analyzer = TrajectoryGraphAnalyzer(graph_data)
     hier_graph = analyzer.get_hier_graph()
     return max((degree for _, degree in hier_graph.out_degree()), default=0)
@@ -149,7 +153,7 @@ def detect_inefficiency_patterns(model_name, instance_id):
             patterns_present.append(pattern)
     inefficent_pattern['Patterns'] = patterns_present
     return inefficent_pattern
-    
+
 
 if __name__ == "__main__":
     # the trajectories to find steps for
@@ -178,14 +182,24 @@ if __name__ == "__main__":
         "gpt-5-mini": {},
         "deepseek-v3": {},
     }
+    anti_patterns = {"gpt-5-mini": {},
+                     "deepseek-v3": {}}
     for instance in gpt_instances:
         data["gpt-5-mini"][instance] = collect_graph_metrics(
             "gpt-5-mini", instance
         )["gpt-5-mini"][instance]
+        anti_patterns["gpt-5-mini"][instance] = detect_inefficiency_patterns(
+            "gpt-5-mini", instance
+        )
     for instance in deepseek_instances:
         data["deepseek-v3"][instance] = collect_graph_metrics(
             "deepseek-v3", instance
         )["deepseek-v3"][instance]
+        anti_patterns["deepseek-v3"][instance] = detect_inefficiency_patterns(
+            "deepseek-v3", instance
+        )
 
     with GRAPH_METRICS_PATH.open("w") as json_file:
         json.dump(data, json_file, indent=2)
+    with open("inefficiency_patterns.json", "w") as f:
+        json.dump(anti_patterns, f, indent=4)
