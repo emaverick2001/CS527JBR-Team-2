@@ -18,8 +18,7 @@ from graph_analysis.analyzer import TrajectoryGraphAnalyzer
 
 def _analysis_csv_path(model_name: str) -> Path:
     """
-    Resolve the model-level analysis CSV using the same SWE-agent analysis
-    assumption your teammate used, with a repo-local fallback.
+    Resolve the model-level analysis CSV.
     """
     candidate_paths = [
         REPO_ROOT / "analysis" / "SWE-agent" / "analysis" / model_name / "trajectory_metrics.csv",
