@@ -30,8 +30,6 @@ The trend is strongest for `gpt-5-mini`, where every required metric is noticeab
 
 ## Task 3 Report
 
-# Task 3
-
 <img src="task3.png" alt="Logo" width="600"/>
 
 The table below summarizes how often each Graphectory inefficiency pattern appeared in resolved versus unresolved trajectories.
