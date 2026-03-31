@@ -49,8 +49,6 @@ Interestingly, `flip_flop` is the only pattern observed in both resolved and unr
 
 The rarer patterns such as `repeat_failed_edit`, `zoom_out`, and `abandonment` could also diagnose a unresolved trajectory. These patterns signal that the agent either failed to converge on the correct edit or drifted away from a productive repair path. Notably, `back_and_forth_switch` does not appear in any of the 20 trajectories.
 
-<br></br>
-
 Overall, successful trajectories are characterized by **controlled and limited inefficiencies**, whereas unresolved trajectories exhibit **multiple, overlapping anti-patterns** that compound and hinder effective recovery.
 
 ## Task 4 Report
