@@ -1,0 +1,739 @@
+{
+  "directed": true,
+  "multigraph": true,
+  "graph": {
+    "resolution_status": "unresolved",
+    "instance_name": "pylint-dev__pylint-7277",
+    "debug_difficulty": "<15 min fix"
+  },
+  "nodes": [
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed",
+        "file_text": "",
+        "view_range": [
+          1,
+          200
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        0
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "0:str_replace_editor: view"
+    },
+    {
+      "label": "ls",
+      "args": [],
+      "flags": {
+        "l": true,
+        "a": true
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        1
+      ],
+      "tool": "",
+      "command": "ls",
+      "subcommand": "",
+      "id": "1:ls"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [
+          1,
+          240
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        2
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "2:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [
+          1,
+          120
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        3
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "3:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [
+          1,
+          109
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization",
+        "localization"
+      ],
+      "step_indices": [
+        4,
+        10
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "4:str_replace_editor: view"
+    },
+    {
+      "label": "grep",
+      "args": [],
+      "flags": {
+        "R": "modify_sys_path",
+        "n": "/testbed"
+      },
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        5
+      ],
+      "tool": "",
+      "command": "grep",
+      "subcommand": "",
+      "id": "5:grep"
+    },
+    {
+      "label": "true",
+      "args": [],
+      "flags": {},
+      "phases": [
+        "general",
+        "general",
+        "general",
+        "general",
+        "general",
+        "general",
+        "general"
+      ],
+      "step_indices": [
+        5,
+        16,
+        17,
+        18,
+        21,
+        22,
+        22
+      ],
+      "tool": "",
+      "command": "true",
+      "subcommand": "",
+      "id": "6:true"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/tests/test_self.py",
+        "file_text": "",
+        "view_range": [
+          720,
+          860
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        6
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "7:str_replace_editor: view"
+    },
+    {
+      "label": "cat",
+      "args": [
+        ">",
+        "/testbed/repro.py",
+        "import sys\nimport runpy\n\nsys.path.insert(0, \"something\")\nprint('before:', sys.path[:4])\nrunpy.run_module('pylint', run_name='__main__', alter_sys=True)\nprint('after:', sys.path[:4])"
+      ],
+      "flags": {
+        "__heredoc__": true
+      },
+      "phases": [
+        "patch"
+      ],
+      "step_indices": [
+        7
+      ],
+      "tool": "",
+      "command": "cat",
+      "subcommand": "",
+      "id": "8:cat"
+    },
+    {
+      "label": "str_replace_editor: str_replace",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [],
+        "old_str": "    sys.path.pop(0)\n    env_pythonpath = os.environ.get(\"PYTHONPATH\", \"\")\n    cwd = os.getcwd()\n    if env_pythonpath.startswith(\":\") and env_pythonpath not in (f\":{cwd}\", \":.\"):\n        sys.path.pop(0)\n    elif env_pythonpath.endswith(\":\") and env_pythonpath not in (f\"{cwd}:\", \".:\"):\n        sys.path.pop(1)\n",
+        "new_str": "    env_pythonpath = os.environ.get(\"PYTHONPATH\", \"\")\n    cwd = os.getcwd()\n    # Only remove the first entry if it refers to the current working\n    # directory (empty string, '.' or the absolute cwd). When running via\n    # runpy the first entry can be something else (for example an entry\n    # added by an extension) and we must not blindly remove it.\n    popped = False\n    if sys.path and (sys.path[0] in (\"\", \".\") or sys.path[0] == cwd):\n        sys.path.pop(0)\n        popped = True\n    # Only attempt to remove further entries if we removed the cwd above.\n    if popped:\n        if env_pythonpath.startswith(\":\") and env_pythonpath not in (f\":{cwd}\", \":.\"):\n            if sys.path:\n                sys.path.pop(0)\n        elif env_pythonpath.endswith(\":\") and env_pythonpath not in (f\"{cwd}:\", \".:\"):\n            if len(sys.path) > 1:\n                sys.path.pop(1)\n",
+        "insert_line": 0,
+        "edit_status": "failure: unknown"
+      },
+      "flags": {},
+      "phases": [
+        "patch",
+        "patch",
+        "patch"
+      ],
+      "step_indices": [
+        8,
+        11,
+        12
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "str_replace",
+      "id": "9:str_replace_editor: str_replace"
+    },
+    {
+      "label": "str_replace_editor: view",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [
+          1,
+          140
+        ],
+        "old_str": "",
+        "new_str": "",
+        "insert_line": 0
+      },
+      "flags": {},
+      "phases": [
+        "localization"
+      ],
+      "step_indices": [
+        9
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "view",
+      "id": "10:str_replace_editor: view"
+    },
+    {
+      "label": "str_replace_editor: str_replace",
+      "args": {
+        "path": "/testbed/pylint/__init__.py",
+        "file_text": "",
+        "view_range": [
+          1,
+          109
+        ],
+        "old_str": "    sys.path.pop(0)\n    env_pythonpath = os.environ.get(\"PYTHONPATH\", \"\")\n    cwd = os.getcwd()\n    if env_pythonpath.startswith(\":\") and env_pythonpath not in (f\":{cwd}\", \":.\"):\n        sys.path.pop(0)\n    elif env_pythonpath.endswith(\":\") and env_pythonpath not in (f\"{cwd}:\", \".:\"):\n        sys.path.pop(1)\n",
+        "new_str": "    env_pythonpath = os.environ.get(\"PYTHONPATH\", \"\")\n    cwd = os.getcwd()\n    # Only remove the first entry if it refers to the current working\n    # directory (empty string, '.' or the absolute cwd). When running via\n    # runpy the first entry can be something else (for example an entry\n    # added by an extension) and we must not blindly remove it.\n    popped = False\n    if sys.path and (sys.path[0] in (\"\", \".\") or sys.path[0] == cwd):\n        sys.path.pop(0)\n        popped = True\n    # Only attempt to remove further entries if we removed the cwd above.\n    if popped:\n        if env_pythonpath.startswith(\":\") and env_pythonpath not in (f\":{cwd}\", \":.\"):\n            if sys.path:\n                sys.path.pop(0)\n        elif env_pythonpath.endswith(\":\") and env_pythonpath not in (f\"{cwd}:\", \".:\"):\n            if len(sys.path) > 1:\n                sys.path.pop(1)\n",
+        "insert_line": 0,
+        "edit_status": "success"
+      },
+      "flags": {},
+      "phases": [
+        "patch"
+      ],
+      "step_indices": [
+        13
+      ],
+      "tool": "str_replace_editor",
+      "command": "",
+      "subcommand": "str_replace",
+      "id": "11:str_replace_editor: str_replace"
+    },
+    {
+      "label": "cat",
+      "args": [
+        ">",
+        "/testbed/repro2.py",
+        "import sys\nimport runpy\n\nsys.path.insert(0, \"something\")\nprint('before:', sys.path[:6])\ntry:\n    runpy.run_module('pylint', run_name='__main__', alter_sys=True)\nexcept SystemExit:\n    print('pylint exited')\nprint('after:', sys.path[:6])"
+      ],
+      "flags": {
+        "__heredoc__": true
+      },
+      "phases": [
+        "patch"
+      ],
+      "step_indices": [
+        14
+      ],
+      "tool": "",
+      "command": "cat",
+      "subcommand": "",
+      "id": "12:cat"
+    },
+    {
+      "label": "pytest",
+      "args": [],
+      "flags": {
+        "q": true
+      },
+      "phases": [
+        "validation"
+      ],
+      "step_indices": [
+        15
+      ],
+      "tool": "",
+      "command": "pytest",
+      "subcommand": "",
+      "id": "13:pytest"
+    },
+    {
+      "label": "pytest",
+      "args": [],
+      "flags": {
+        "q": true,
+        "k": "modify_sys_path"
+      },
+      "phases": [
+        "validation",
+        "validation",
+        "validation"
+      ],
+      "step_indices": [
+        16,
+        17,
+        18
+      ],
+      "tool": "",
+      "command": "pytest",
+      "subcommand": "",
+      "id": "14:pytest"
+    },
+    {
+      "label": "think",
+      "args": {},
+      "flags": {},
+      "phases": [
+        "general",
+        "general"
+      ],
+      "step_indices": [
+        19,
+        23
+      ],
+      "tool": null,
+      "command": null,
+      "subcommand": null,
+      "id": "15:think"
+    },
+    {
+      "label": "submit",
+      "args": {},
+      "flags": {},
+      "phases": [
+        "general",
+        "general"
+      ],
+      "step_indices": [
+        20,
+        24
+      ],
+      "tool": "submit",
+      "command": "",
+      "subcommand": "",
+      "id": "16:submit"
+    },
+    {
+      "label": "git",
+      "args": [
+        "add"
+      ],
+      "flags": {
+        "A": true
+      },
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        21
+      ],
+      "tool": "",
+      "command": "git",
+      "subcommand": "",
+      "id": "17:git"
+    },
+    {
+      "label": "git",
+      "args": [
+        "commit"
+      ],
+      "flags": {
+        "m": "Only remove cwd from sys.path if first entry refers to cwd; avoid popping arbitrary entries when run via runpy"
+      },
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        21
+      ],
+      "tool": "",
+      "command": "git",
+      "subcommand": "",
+      "id": "18:git"
+    },
+    {
+      "label": "git",
+      "args": [
+        "rm",
+        "repro.py",
+        "repro2.py"
+      ],
+      "flags": {},
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        22
+      ],
+      "tool": "",
+      "command": "git",
+      "subcommand": "",
+      "id": "19:git"
+    },
+    {
+      "label": "git",
+      "args": [
+        "commit"
+      ],
+      "flags": {
+        "m": "Remove reproduction scripts"
+      },
+      "phases": [
+        "general"
+      ],
+      "step_indices": [
+        22
+      ],
+      "tool": "",
+      "command": "git",
+      "subcommand": "",
+      "id": "20:git"
+    }
+  ],
+  "edges": [
+    {
+      "label": "1",
+      "type": "exec",
+      "source": "0:str_replace_editor: view",
+      "target": "1:ls",
+      "key": 0
+    },
+    {
+      "label": "2",
+      "type": "exec",
+      "source": "1:ls",
+      "target": "2:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "3",
+      "type": "exec",
+      "source": "2:str_replace_editor: view",
+      "target": "3:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "2:str_replace_editor: view",
+      "target": "3:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "type": "hier",
+      "source": "2:str_replace_editor: view",
+      "target": "4:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "2:str_replace_editor: view",
+      "target": "10:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "4",
+      "type": "exec",
+      "source": "3:str_replace_editor: view",
+      "target": "4:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "3:str_replace_editor: view",
+      "target": "4:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "label": "5",
+      "type": "exec",
+      "source": "4:str_replace_editor: view",
+      "target": "5:grep",
+      "key": 0
+    },
+    {
+      "label": "11",
+      "type": "exec",
+      "source": "4:str_replace_editor: view",
+      "target": "9:str_replace_editor: str_replace",
+      "key": 0
+    },
+    {
+      "label": "5",
+      "type": "exec",
+      "source": "5:grep",
+      "target": "6:true",
+      "key": 0
+    },
+    {
+      "label": "6",
+      "type": "exec",
+      "source": "6:true",
+      "target": "7:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "17",
+      "type": "exec",
+      "source": "6:true",
+      "target": "14:pytest",
+      "key": 0
+    },
+    {
+      "label": "18",
+      "type": "exec",
+      "source": "6:true",
+      "target": "14:pytest",
+      "key": 1
+    },
+    {
+      "label": "19",
+      "type": "exec",
+      "source": "6:true",
+      "target": "15:think",
+      "key": 0
+    },
+    {
+      "label": "23",
+      "type": "exec",
+      "source": "6:true",
+      "target": "15:think",
+      "key": 1
+    },
+    {
+      "label": "22",
+      "type": "exec",
+      "source": "6:true",
+      "target": "19:git",
+      "key": 0
+    },
+    {
+      "label": "22",
+      "type": "exec",
+      "source": "6:true",
+      "target": "20:git",
+      "key": 0
+    },
+    {
+      "label": "7",
+      "type": "exec",
+      "source": "7:str_replace_editor: view",
+      "target": "8:cat",
+      "key": 0
+    },
+    {
+      "label": "8",
+      "type": "exec",
+      "source": "8:cat",
+      "target": "9:str_replace_editor: str_replace",
+      "key": 0
+    },
+    {
+      "label": "9",
+      "type": "exec",
+      "source": "9:str_replace_editor: str_replace",
+      "target": "10:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "12",
+      "type": "exec",
+      "source": "9:str_replace_editor: str_replace",
+      "target": "9:str_replace_editor: str_replace",
+      "key": 0
+    },
+    {
+      "label": "13",
+      "type": "exec",
+      "source": "9:str_replace_editor: str_replace",
+      "target": "11:str_replace_editor: str_replace",
+      "key": 0
+    },
+    {
+      "label": "10",
+      "type": "exec",
+      "source": "10:str_replace_editor: view",
+      "target": "4:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "type": "hier",
+      "source": "10:str_replace_editor: view",
+      "target": "4:str_replace_editor: view",
+      "key": 1
+    },
+    {
+      "type": "hier",
+      "source": "10:str_replace_editor: view",
+      "target": "3:str_replace_editor: view",
+      "key": 0
+    },
+    {
+      "label": "14",
+      "type": "exec",
+      "source": "11:str_replace_editor: str_replace",
+      "target": "12:cat",
+      "key": 0
+    },
+    {
+      "label": "15",
+      "type": "exec",
+      "source": "12:cat",
+      "target": "13:pytest",
+      "key": 0
+    },
+    {
+      "label": "16",
+      "type": "exec",
+      "source": "13:pytest",
+      "target": "14:pytest",
+      "key": 0
+    },
+    {
+      "label": "16",
+      "type": "exec",
+      "source": "14:pytest",
+      "target": "6:true",
+      "key": 0
+    },
+    {
+      "label": "17",
+      "type": "exec",
+      "source": "14:pytest",
+      "target": "6:true",
+      "key": 1
+    },
+    {
+      "label": "18",
+      "type": "exec",
+      "source": "14:pytest",
+      "target": "6:true",
+      "key": 2
+    },
+    {
+      "label": "20",
+      "type": "exec",
+      "source": "15:think",
+      "target": "16:submit",
+      "key": 0
+    },
+    {
+      "label": "24",
+      "type": "exec",
+      "source": "15:think",
+      "target": "16:submit",
+      "key": 1
+    },
+    {
+      "label": "21",
+      "type": "exec",
+      "source": "16:submit",
+      "target": "17:git",
+      "key": 0
+    },
+    {
+      "label": "21",
+      "type": "exec",
+      "source": "17:git",
+      "target": "18:git",
+      "key": 0
+    },
+    {
+      "label": "21",
+      "type": "exec",
+      "source": "18:git",
+      "target": "6:true",
+      "key": 0
+    },
+    {
+      "label": "22",
+      "type": "exec",
+      "source": "19:git",
+      "target": "6:true",
+      "key": 0
+    },
+    {
+      "label": "22",
+      "type": "exec",
+      "source": "20:git",
+      "target": "6:true",
+      "key": 0
+    }
+  ]
+}
