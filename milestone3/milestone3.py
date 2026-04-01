@@ -1,4 +1,4 @@
-from graph_analysis.analyzer import TrajectoryGraphAnalyzer
+from graphectory.graph_analysis.analyzer import TrajectoryGraphAnalyzer
 import json
 from pathlib import Path
 
@@ -7,8 +7,9 @@ import sys
 
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-GRAPHS_DIR = REPO_ROOT / "milestone3" / "graphs"
-GRAPH_METRICS_PATH = REPO_ROOT / "milestone3" / "graph_metrics.json"
+MILESTONE3_DIR = Path(__file__).resolve().parent        # milestone3/
+GRAPHS_DIR = MILESTONE3_DIR / "graphs"
+GRAPH_METRICS_PATH = MILESTONE3_DIR / "graph_metrics.json"
 GRAPHECTORY_DIR = REPO_ROOT / "graphectory"
 
 if str(GRAPHECTORY_DIR) not in sys.path:
@@ -19,11 +20,10 @@ def _analysis_csv_path(model_name: str) -> Path:
     """
     Resolve the model-level analysis CSV.
     """
+    print('model name is ', model_name)
     candidate_paths = [
-        REPO_ROOT / "analysis" / "SWE-agent" / "analysis" /
-        model_name / "trajectory_metrics.csv",
-        REPO_ROOT / "graphectory" / "data" / "SWE-agent" /
-        "analysis" / model_name / "trajectory_metrics.csv",
+        MILESTONE3_DIR / "analysis" / "SWE-agent" / "analysis" /
+        model_name / "trajectory_metrics.csv"
     ]
 
     for candidate_path in candidate_paths:
@@ -51,7 +51,11 @@ def _instance_metrics_row(model_name: str, instance_id: str) -> pd.Series:
 
 def _graph_json_path(model_name: str, instance_id: str) -> Path:
     """Resolve the generated graph JSON for one model/instance pair."""
-    graph_path = GRAPHS_DIR / model_name / instance_id / f"{instance_id}.json"
+    if model_name == "gpt-5-mini":
+        model_name = "gpt5_mini"
+    else:
+        model_name = 'deepseek_v3'
+    graph_path = GRAPHS_DIR / f"{model_name}-{instance_id}.json"
     if not graph_path.exists():
         raise FileNotFoundError(
             f"Graph JSON does not exist for '{model_name}/{instance_id}': {graph_path}")
@@ -126,14 +130,11 @@ def collect_graph_metrics(model_name: str, instance_id: str) -> dict:
 
 
 def detect_inefficiency_patterns(model_name, instance_id):
-    # model : instance {status, }
-    # metric can be obtained from csv
-    # iterate through the dataframe
-    # read in the dataframe based on the model name
-    # iloc the instance ID
-    # the assumption is analysis file is stored in analysis/swe-agent/analysis
     inefficent_pattern = {}
-    file_name = f'analysis/SWE-agent/analysis/{model_name}/trajectory_metrics.csv'
+    file_name = (
+        MILESTONE3_DIR / "analysis" / "SWE-agent" / "analysis" /
+        model_name / "trajectory_metrics.csv"
+    )
     graph_metrics = pd.read_csv(file_name)
     status = graph_metrics.query(
         f'instance == "{instance_id}"').iloc[0]['resolution']
