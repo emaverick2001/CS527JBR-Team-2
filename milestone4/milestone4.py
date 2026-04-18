@@ -1,5 +1,4 @@
 from __future__ import annotations
-
 import json
 import sys
 from pathlib import Path
@@ -11,12 +10,15 @@ GRAPH_DIR = REPO_ROOT / "milestone3" / "graphs"
 GRAPHECTORY_DIR = REPO_ROOT / "milestone3" / "graphectory"
 PHASE_SEQUENCE_PATH = BASE_DIR / "phase_sequence.json"
 SHORTCUTS_BACKTRACKS_PATH = BASE_DIR / "shortcuts_backtracks.json"
+SHARED_STRATEGY_PATH = BASE_DIR / "shared_strategy.json"
 
 if str(GRAPHECTORY_DIR) not in sys.path:
     sys.path.insert(0, str(GRAPHECTORY_DIR))
 
-from lang_construction.buildPhases import build_phase_sequence
+from lang_construction.buildPhases import (build_phase_sequence, build_phase_sequence_rle)
+from lang_construction.computeLCP import PatternMiner
 from lang_construction.extractSeq import extract_node_sequence
+
 
 def _iter_graph_pairs():
     for graph_path in sorted(GRAPH_DIR.glob("*.json")):
@@ -39,6 +41,7 @@ def write_phase_sequence_json() -> dict:
         json.dump(payload, file, indent=2)
     return payload
 
+
 def _load_graph_json(model_name: str, instance_id: str) -> dict:
     graph_path = GRAPH_DIR / f"{model_name}-{instance_id}.json"
     if not graph_path.exists():
@@ -49,10 +52,12 @@ def _load_graph_json(model_name: str, instance_id: str) -> dict:
     with graph_path.open(encoding="utf-8") as file:
         return json.load(file)
 
+
 def extract_phase_sequences(model_name: str, instance_id: str) -> list:
     graph_json = _load_graph_json(model_name, instance_id)
     step_nodes = extract_node_sequence(graph_json)
     return build_phase_sequence(step_nodes)
+
 
 def shortcuts_backtracks_detection(model_name: str, instance_id: str) -> dict:
     if not PHASE_SEQUENCE_PATH.exists():
@@ -80,6 +85,7 @@ def shortcuts_backtracks_detection(model_name: str, instance_id: str) -> dict:
 
     return result
 
+
 def write_shortcuts_backtracks_json() -> dict:
     if not PHASE_SEQUENCE_PATH.exists():
         write_phase_sequence_json()
@@ -99,13 +105,52 @@ def write_shortcuts_backtracks_json() -> dict:
         json.dump(payload, file, indent=2)
     return payload
 
+
 def check_plan_compliance(model_name: str, instance_id: str) -> dict:
     pass
 
+
 def mine_shared_strategy(model_name: str) -> list:
-    pass
+    # to find the longest subsequence using Pattern Miner we need to the RLE
+    # to get the rle we can use build-phase_seq_rle which is under buildphases
+    # but the issue is it requires the node. So this function should read all the graphs.json file that is under graphs with the model as a prefix
+
+    sequences_rle = []
+
+    for graph_path in sorted(GRAPH_DIR.glob(f"{model_name}-*.json")):
+        instance_id = graph_path.stem.removeprefix(f"{model_name}-")
+        # helper function define in task 1
+        graph_data = _load_graph_json(model_name, instance_id)
+
+        # Use the repository scripts to get the sequence and lengths
+        step_nodes = extract_node_sequence(graph_data)
+        phases, lens = build_phase_sequence_rle(step_nodes)
+        sequences_rle.append({"seq": phases, "lens": lens})
+
+    # now all the sequence RLE is done, we can call the PatternMiner
+    # the min support is set to 1 cos we want the longest subsequence across all instances
+    miner = PatternMiner(min_support=1.0)
+    result = miner.longest_ranked_top1(sequences_rle)
+    # the result contains pattern, percentage, lowerbound and we are only interested in pattern
+    # but the result can be None as well so
+    shared_seq = list(result[0]) if result else []
+    return shared_seq
+
+def write_LCP_seq():
+    models = ["gpt-5-mini", "deepseek-v3"]
+    payload = {}
+
+    # 2. Compute the strategy for each model
+    for model in models:
+        payload[model] = mine_shared_strategy(model)
+
+    # 3. Write the aggregated dictionary to shared_strategy.json
+    with SHARED_STRATEGY_PATH.open("w", encoding="utf-8") as file:
+        json.dump(payload, file, indent=2)
+    
 
 
 if __name__ == "__main__":
     write_phase_sequence_json()
     write_shortcuts_backtracks_json()
+    write_LCP_seq()
