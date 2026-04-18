@@ -8,7 +8,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = BASE_DIR.parent
 GRAPH_DIR = REPO_ROOT / "milestone3" / "graphs"
-GRAPHECTORY_DIR = REPO_ROOT / "graphectory"
+GRAPHECTORY_DIR = REPO_ROOT / "milestone3" / "graphectory"
 PHASE_SEQUENCE_PATH = BASE_DIR / "phase_sequence.json"
 SHORTCUTS_BACKTRACKS_PATH = BASE_DIR / "shortcuts_backtracks.json"
 

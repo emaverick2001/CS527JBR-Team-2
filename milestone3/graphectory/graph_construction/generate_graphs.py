@@ -22,8 +22,8 @@ from typing import Optional, Dict, Any, List
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from dataclasses import dataclass
 
-from commandParser import CommandParser
-from buildGraph import build_graph_from_sa_trajectory, build_graph_from_oh_trajectory
+from milestone3.graphectory.graph_construction.commandParser import CommandParser
+from milestone3.graphectory.graph_construction.buildGraph import build_graph_from_sa_trajectory, build_graph_from_oh_trajectory
 
 
 # ==================== Configuration ====================

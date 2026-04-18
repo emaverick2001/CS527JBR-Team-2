@@ -22,9 +22,9 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Literal
 from collections import defaultdict
 
-from lang_construction.extractSeq import extract_node_sequence
-from lang_construction.buildPhases import build_phase_sequence_rle
-from lang_construction.computeLCP import PatternMiner
+from milestone3.graphectory.lang_construction.extractSeq import extract_node_sequence
+from milestone3.graphectory.lang_construction.buildPhases import build_phase_sequence_rle
+from milestone3.graphectory.lang_construction.computeLCP import PatternMiner
 
 
 # ----------------------- Configuration -----------------------

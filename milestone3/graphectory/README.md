@@ -18,7 +18,7 @@ Graphectory transforms agent execution traces into structured graphs that captur
 
 ```bash
 
-cd graphectory
+cd milestone3/graphectory
 python -m pip install -e .
 ```
 

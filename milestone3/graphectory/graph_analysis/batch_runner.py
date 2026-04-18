@@ -4,7 +4,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from graph_analysis.processor import TrajectoryAnalysisProcessor
+from milestone3.graphectory.graph_analysis.processor import TrajectoryAnalysisProcessor
 
 
 DEFAULT_AGENTS = ["SWE-agent", "OpenHands"]

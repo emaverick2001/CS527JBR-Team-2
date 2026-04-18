@@ -1,4 +1,4 @@
-from graphectory.graph_analysis.analyzer import TrajectoryGraphAnalyzer
+from milestone3.graphectory.graph_analysis.analyzer import TrajectoryGraphAnalyzer
 import json
 from pathlib import Path
 
@@ -10,7 +10,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MILESTONE3_DIR = Path(__file__).resolve().parent        # milestone3/
 GRAPHS_DIR = MILESTONE3_DIR / "graphs"
 GRAPH_METRICS_PATH = MILESTONE3_DIR / "graph_metrics.json"
-GRAPHECTORY_DIR = REPO_ROOT / "graphectory"
+GRAPHECTORY_DIR = REPO_ROOT / "milestone3" / "graphectory"
 
 if str(GRAPHECTORY_DIR) not in sys.path:
     sys.path.insert(0, str(GRAPHECTORY_DIR))

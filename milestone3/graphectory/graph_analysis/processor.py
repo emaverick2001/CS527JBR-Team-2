@@ -6,7 +6,7 @@ from typing import Any
 
 import pandas as pd
 
-from graph_analysis.analyzer import TrajectoryGraphAnalyzer
+from milestone3.graphectory.graph_analysis.analyzer import TrajectoryGraphAnalyzer
 
 
 class GraphMetricsExtractor:

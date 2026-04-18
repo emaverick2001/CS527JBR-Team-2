@@ -7,13 +7,13 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, FancyBboxPatch
 from pathlib import Path
 from networkx.readwrite import json_graph
-from graph_construction.commandParser import CommandParser
+from milestone3.graphectory.graph_construction.commandParser import CommandParser
 from datasets import load_dataset
 from collections import defaultdict
 import getpass
 import tempfile
 import multiprocessing
-from graph_construction.mapPhase import get_phase
+from milestone3.graphectory.graph_construction.mapPhase import get_phase
 import pygraphviz as pgv
 _HAS_PYGRAPHVIZ = True
 
