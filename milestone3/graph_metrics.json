@@ -1,0 +1,166 @@
+{
+  "gpt-5-mini": {
+    "django__django-13109": {
+      "NodeCount": 37,
+      "TempEdgeCount": 40,
+      "LoopCount": 3,
+      "AvgLoopLength": 2.6666666666666665,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "django__django-17029": {
+      "NodeCount": 20,
+      "TempEdgeCount": 22,
+      "LoopCount": 2,
+      "AvgLoopLength": 2.5,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "django__django-10880": {
+      "NodeCount": 32,
+      "TempEdgeCount": 39,
+      "LoopCount": 7,
+      "AvgLoopLength": 7.285714285714286,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 3
+    },
+    "django__django-13837": {
+      "NodeCount": 27,
+      "TempEdgeCount": 32,
+      "LoopCount": 4,
+      "AvgLoopLength": 3.5,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "django__django-16661": {
+      "NodeCount": 89,
+      "TempEdgeCount": 110,
+      "LoopCount": 24,
+      "AvgLoopLength": 9.541666666666666,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 2
+    },
+    "pylint-dev__pylint-7277": {
+      "NodeCount": 21,
+      "TempEdgeCount": 33,
+      "LoopCount": 8,
+      "AvgLoopLength": 3.75,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 3
+    },
+    "sphinx-doc__sphinx-11510": {
+      "NodeCount": 44,
+      "TempEdgeCount": 50,
+      "LoopCount": 6,
+      "AvgLoopLength": 5.166666666666667,
+      "StructuralEdgeCount": 1,
+      "StructuralBreadth": 1
+    }
+  },
+  "deepseek-v3": {
+    "sphinx-doc__sphinx-9281": {
+      "NodeCount": 16,
+      "TempEdgeCount": 19,
+      "LoopCount": 3,
+      "AvgLoopLength": 4,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 2
+    },
+    "sympy__sympy-14531": {
+      "NodeCount": 16,
+      "TempEdgeCount": 17,
+      "LoopCount": 2,
+      "AvgLoopLength": 3.5,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 2
+    },
+    "sympy__sympy-24539": {
+      "NodeCount": 7,
+      "TempEdgeCount": 9,
+      "LoopCount": 3,
+      "AvgLoopLength": 3.3333333333333335,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "astropy__astropy-13033": {
+      "NodeCount": 10,
+      "TempEdgeCount": 13,
+      "LoopCount": 4,
+      "AvgLoopLength": 3,
+      "StructuralEdgeCount": 2,
+      "StructuralBreadth": 1
+    },
+    "django__django-11138": {
+      "NodeCount": 4,
+      "TempEdgeCount": 4,
+      "LoopCount": 1,
+      "AvgLoopLength": 1,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "django__django-11141": {
+      "NodeCount": 6,
+      "TempEdgeCount": 6,
+      "LoopCount": 1,
+      "AvgLoopLength": 1,
+      "StructuralEdgeCount": 2,
+      "StructuralBreadth": 1
+    },
+    "django__django-11211": {
+      "NodeCount": 5,
+      "TempEdgeCount": 6,
+      "LoopCount": 1,
+      "AvgLoopLength": 2,
+      "StructuralEdgeCount": 1,
+      "StructuralBreadth": 1
+    },
+    "django__django-12308": {
+      "NodeCount": 6,
+      "TempEdgeCount": 8,
+      "LoopCount": 2,
+      "AvgLoopLength": 3.5,
+      "StructuralEdgeCount": 2,
+      "StructuralBreadth": 2
+    },
+    "django__django-14351": {
+      "NodeCount": 18,
+      "TempEdgeCount": 18,
+      "LoopCount": 1,
+      "AvgLoopLength": 3,
+      "StructuralEdgeCount": 6,
+      "StructuralBreadth": 3
+    },
+    "django__django-15268": {
+      "NodeCount": 9,
+      "TempEdgeCount": 10,
+      "LoopCount": 2,
+      "AvgLoopLength": 1.5,
+      "StructuralEdgeCount": 5,
+      "StructuralBreadth": 2
+    },
+    "pydata__xarray-4695": {
+      "NodeCount": 21,
+      "TempEdgeCount": 45,
+      "LoopCount": 18,
+      "AvgLoopLength": 4.388888888888889,
+      "StructuralEdgeCount": 3,
+      "StructuralBreadth": 2
+    },
+    "pylint-dev__pylint-7277": {
+      "NodeCount": 11,
+      "TempEdgeCount": 16,
+      "LoopCount": 5,
+      "AvgLoopLength": 2.4,
+      "StructuralEdgeCount": 0,
+      "StructuralBreadth": 0
+    },
+    "sympy__sympy-24443": {
+      "NodeCount": 12,
+      "TempEdgeCount": 23,
+      "LoopCount": 8,
+      "AvgLoopLength": 2.375,
+      "StructuralEdgeCount": 3,
+      "StructuralBreadth": 2
+    }
+  }
+}

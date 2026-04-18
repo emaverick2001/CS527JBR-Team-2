@@ -1,0 +1,116 @@
+{
+    "gpt-5-mini": {
+        "django__django-13109": {
+            "Status": "resolved",
+            "Patterns": [
+                "flip_flop"
+            ]
+        },
+        "django__django-17029": {
+            "Status": "resolved",
+            "Patterns": [
+                "flip_flop"
+            ]
+        },
+        "django__django-10880": {
+            "Status": "unresolved",
+            "Patterns": [
+                "flip_flop",
+                "scroll_behavior"
+            ]
+        },
+        "django__django-13837": {
+            "Status": "unresolved",
+            "Patterns": [
+                "repeat_failed_edit",
+                "flip_flop",
+                "scroll_behavior",
+                "abandonment"
+            ]
+        },
+        "django__django-16661": {
+            "Status": "unresolved",
+            "Patterns": [
+                "flip_flop",
+                "scroll_behavior"
+            ]
+        },
+        "pylint-dev__pylint-7277": {
+            "Status": "unresolved",
+            "Patterns": [
+                "repeat_failed_edit",
+                "scroll_behavior"
+            ]
+        },
+        "sphinx-doc__sphinx-11510": {
+            "Status": "unresolved",
+            "Patterns": [
+                "flip_flop",
+                "scroll_behavior"
+            ]
+        }
+    },
+    "deepseek-v3": {
+        "sphinx-doc__sphinx-9281": {
+            "Status": "resolved",
+            "Patterns": []
+        },
+        "sympy__sympy-14531": {
+            "Status": "resolved",
+            "Patterns": []
+        },
+        "sympy__sympy-24539": {
+            "Status": "resolved",
+            "Patterns": []
+        },
+        "astropy__astropy-13033": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "django__django-11138": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "django__django-11141": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "django__django-11211": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "django__django-12308": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "django__django-14351": {
+            "Status": "unresolved",
+            "Patterns": [
+                "scroll_behavior"
+            ]
+        },
+        "django__django-15268": {
+            "Status": "unresolved",
+            "Patterns": [
+                "scroll_behavior"
+            ]
+        },
+        "pydata__xarray-4695": {
+            "Status": "unresolved",
+            "Patterns": [
+                "scroll_behavior"
+            ]
+        },
+        "pylint-dev__pylint-7277": {
+            "Status": "unresolved",
+            "Patterns": []
+        },
+        "sympy__sympy-24443": {
+            "Status": "unresolved",
+            "Patterns": [
+                "scroll_behavior",
+                "zoom_out"
+            ]
+        }
+    }
+}
