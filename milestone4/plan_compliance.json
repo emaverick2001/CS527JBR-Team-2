@@ -1,0 +1,146 @@
+{
+  "deepseek-v3": {
+    "astropy__astropy-13033": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-11138": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": false,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": true
+    },
+    "django__django-11141": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": false,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": true
+    },
+    "django__django-11211": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": false,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": true
+    },
+    "django__django-12308": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": false,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": true
+    },
+    "django__django-14351": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-15268": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": false,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "pydata__xarray-4695": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "pylint-dev__pylint-7277": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "sphinx-doc__sphinx-9281": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "sympy__sympy-14531": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "sympy__sympy-24443": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "sympy__sympy-24539": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    }
+  },
+  "gpt-5-mini": {
+    "django__django-10880": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-13109": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-13837": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-16661": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "django__django-17029": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": true
+    },
+    "pylint-dev__pylint-7277": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    },
+    "sphinx-doc__sphinx-11510": {
+      "HasLocalization": true,
+      "HasPatch": true,
+      "HasValidation": true,
+      "PatchBeforeLocalizationViolation": false,
+      "SubmitWithoutValidationViolation": false
+    }
+  }
+}

@@ -11,6 +11,7 @@ GRAPH_DIR = REPO_ROOT / "milestone3" / "graphs"
 GRAPHECTORY_DIR = REPO_ROOT / "milestone3" / "graphectory"
 PHASE_SEQUENCE_PATH = BASE_DIR / "phase_sequence.json"
 SHORTCUTS_BACKTRACKS_PATH = BASE_DIR / "shortcuts_backtracks.json"
+PLAN_COMPLIANCE_PATH = BASE_DIR / "plan_compliance.json"
 
 if str(GRAPHECTORY_DIR) not in sys.path:
     sys.path.insert(0, str(GRAPHECTORY_DIR))
@@ -81,11 +82,7 @@ def shortcuts_backtracks_detection(model_name: str, instance_id: str) -> dict:
     return result
 
 def write_shortcuts_backtracks_json() -> dict:
-    if not PHASE_SEQUENCE_PATH.exists():
-        write_phase_sequence_json()
-
-    with PHASE_SEQUENCE_PATH.open(encoding="utf-8") as file:
-        phase_data = json.load(file)
+    phase_data = _load_phase_sequence_json()
 
     payload: dict[str, dict[str, dict[str, int]]] = {}
     for model_name, instances in phase_data.items():
@@ -99,8 +96,79 @@ def write_shortcuts_backtracks_json() -> dict:
         json.dump(payload, file, indent=2)
     return payload
 
+def _load_phase_sequence_json() -> dict:
+    if not PHASE_SEQUENCE_PATH.exists():
+        write_phase_sequence_json()
+
+    with PHASE_SEQUENCE_PATH.open(encoding="utf-8") as file:
+        return json.load(file)
+
+def _load_phase_sequence(model_name: str, instance_id: str) -> list:
+    phase_data = _load_phase_sequence_json()
+
+    if model_name not in phase_data or instance_id not in phase_data[model_name]:
+        raise KeyError(
+            f"Missing phase sequence for model '{model_name}' and instance "
+            f"'{instance_id}' in {PHASE_SEQUENCE_PATH}"
+        )
+
+    return phase_data[model_name][instance_id]
+
+def _load_resolution_status(model_name: str, instance_id: str) -> str:
+    graph_json = _load_graph_json(model_name, instance_id)
+    graph_metadata = graph_json.get("graph", {})
+    status = graph_metadata.get("resolution_status", "")
+    status = str(status).strip().lower()
+    if status in {"resolved", "unresolved"}:
+        return status
+    return ""
+
 def check_plan_compliance(model_name: str, instance_id: str) -> dict:
-    pass
+    sequence = _load_phase_sequence(model_name, instance_id)
+    resolution_status = _load_resolution_status(model_name, instance_id)
+
+    has_localization = "L" in sequence
+    has_patch = "P" in sequence
+    has_validation = "V" in sequence
+
+    first_patch_index = sequence.index("P") if has_patch else None
+    first_localization_index = sequence.index("L") if has_localization else None
+    patch_before_localization = bool(
+        has_patch
+        and (
+            first_localization_index is None
+            or first_patch_index < first_localization_index
+        )
+    )
+
+    submit_without_validation = bool(
+        resolution_status in {"resolved", "unresolved"}
+        and sequence
+        and sequence[-1] == "P"
+    )
+
+    return {
+        "HasLocalization": has_localization,
+        "HasPatch": has_patch,
+        "HasValidation": has_validation,
+        "PatchBeforeLocalizationViolation": patch_before_localization,
+        "SubmitWithoutValidationViolation": submit_without_validation,
+    }
+
+def write_plan_compliance_json() -> dict:
+    phase_data = _load_phase_sequence_json()
+
+    payload: dict[str, dict[str, dict[str, bool]]] = {}
+    for model_name, instances in phase_data.items():
+        payload[model_name] = {}
+        for instance_id in instances:
+            payload[model_name][instance_id] = check_plan_compliance(
+                model_name, instance_id
+            )
+
+    with PLAN_COMPLIANCE_PATH.open("w", encoding="utf-8") as file:
+        json.dump(payload, file, indent=2)
+    return payload
 
 def mine_shared_strategy(model_name: str) -> list:
     pass
@@ -109,3 +177,4 @@ def mine_shared_strategy(model_name: str) -> list:
 if __name__ == "__main__":
     write_phase_sequence_json()
     write_shortcuts_backtracks_json()
+    write_plan_compliance_json()
